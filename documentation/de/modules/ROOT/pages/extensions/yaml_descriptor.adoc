@@ -1,0 +1,108 @@
+= YAML-Deskriptor
+
+Die YAML-Deskriptor-Erweiterung kann verwendet werden, um die Konnektorkonfiguration im YAML-Format zu beschreiben.
+Der Konnektordeskriptor kann unübersichtlich werden, wenn er im Java-Code beschrieben wird.
+Die Erweiterung ermöglicht es, den Konnektordeskriptor in einer YAML-Datei zu definieren, was leichter zu lesen und zu pflegen ist.
+
+YAML-Dateien anstelle von Java-Code bieten mehrere Vorteile:
+
+* *Trennung von Konfiguration und Implementierung*
+* *Verbesserte Lesbarkeit* für Nicht-Entwickler
+* *Konsistentes Format* für verschiedene Konnektortypen
+* *Externe Konfigurationsmöglichkeiten* ohne Codeänderungen
+
+[TIP]
+====
+Eine vollständige Referenz der Konfigurationskomponenten und -eigenschaften finden Sie unter xref:/reference/configuration.adoc[TRANSCONNECT Konnektorkonfiguration].
+====
+
+== Wie verwendet man die YAML-Deskriptor-Erweiterung?
+
+Die folgende Abhängigkeit muss zur Datei `build.gradle.kts` des Konnektormoduls hinzugefügt werden:
+
+[source,kotlin]
+....
+dependencies {
+    implementation("io.transconnect.connector.extension:yaml-descriptor:$version")
+}
+....
+
+Die jeweils aktuelle Version der `yaml-descriptor`-Erweiterung finden Sie im Maven-Repository.
+
+Die Erweiterung kann dann direkt in der Konnektorklasse verwendet werden.
+
+[source,java,indent=0]
+....
+@Override
+public ConsumerConnectorDescriptor getDescription() {
+    return ConnectorDescriptionUtils.createConsumerDescriptionFromYaml(
+                    this.getClass().getResourceAsStream("/consumerConnector.yaml"));
+}
+....
+
+In diesem Beispiel befindet sich die Datei `consumerConnector.yaml` im Ressourcenverzeichnis des Konnektormoduls.
+Sie ist somit im Klassenpfad des Konnektors verfügbar.
+
+NOTE: Die YAML-Deskriptor-Erweiterung ist auch für Producer-Konnektoren verfügbar.
+
+== Verzeichnisstruktur
+
+Ein typisches Konnektorprojekt mit YAML-Konfiguration sieht folgendermaßen aus:
+
+[source]
+....
+src/
+├── main/
+│   ├── java/
+│   │   └── com/example/connector/
+│   │       ├── consumer/
+│   │       │   └── CountCharactersConnector.java
+│   │       └── producer/
+│   │           └── DateTimeConnector.java
+│   └── resources/
+│       ├── CountCharactersConnector.yaml
+│       └── DateTimeConnector.yaml
+....
+
+== YAML-Konfigurationsbeispiele
+
+Nachfolgend finden Sie Beispiele für YAML-Konfigurationsdateien für verschiedene Konnektortypen.
+
+.CountCharactersConnector.yaml
+[source,yaml]
+....
+include::example$tutorial-example/src/main/resources/CountCharactersConnector.yaml[line=1..1]
+....
+
+.DateTimeConnector.yaml
+[source,yaml]
+....
+include::example$tutorial-example/src/main/resources/DateTimeConnector.yaml[line=1..1]
+....
+
+[NOTE]
+====
+Die Struktur dieser YAML-Dateien entspricht direkt dem in Abschnitt xref:/reference/configuration.adoc#configuration-elements[Konfigurationselemente] erläuterten Konfigurationsmodell.
+====
+
+== Fehlerbehebung
+
+=== Häufige Probleme
+
+[cols="1,3",options="header"]
+|====
+|Problem |Lösung
+|YAML-Datei nicht gefunden |Überprüfen Sie den Dateipfad und -namen im `getResourceAsStream`-Aufruf
+|Ungültiges YAML-Format |Verwenden Sie einen YAML-Validator, um Syntaxfehler zu prüfen
+|Fehlende erforderliche Felder |Stellen Sie sicher, dass alle erforderlichen Felder in Ihrem YAML vorhanden sind
+|Typumwandlungsfehler |Überprüfen Sie, dass die Eigenschaftstypen den erwarteten Werten entsprechen
+|====
+
+=== Validierungsfehler
+
+Falls Sie auf Validierungsfehler stoßen:
+
+1. Überprüfen Sie, dass die Eigenschaftstypen den erwarteten Datentypen entsprechen
+2. Prüfen Sie, dass alle referenzierten URIs korrekt formatiert sind
+3. Stellen Sie sicher, dass die Validator-Konfigurationen korrekt sind
+4. Überprüfen Sie, dass Eigenschaftsabhängigkeiten korrekt definiert sind

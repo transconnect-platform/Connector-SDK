@@ -1,0 +1,71 @@
+= Einführung
+
+Connectoren (Connectors) sind die zentralen Integrationskomponenten in TRANSCONNECT.
+Sie ermöglichen die Kommunikation zwischen externen Systemen und der Plattform.
+Mit dem Connector SDK können Sie:
+
+Nachrichten erzeugen:: die an TRANSCONNECT zur weiteren Verarbeitung gesendet werden.
+Nachrichten konsumieren:: von TRANSCONNECT empfangen, verarbeiten und eine Antwort zurückgeben.
+
+== Producer-Connectoren
+
+Ein Producer-Connector ist der Auslöser für einen Prozess.
+Er erstellt eine neue Nachricht und übergibt sie an TRANSCONNECT zur weiteren Verarbeitung.
+
+Quellen für neue Nachrichten können sein...
+
+* ... ein Timer, der in regelmäßigen Abständen auslöst.
+* ... ein Timer, der zu einem bestimmten Zeitpunkt auslöst.
+* ... ein externes System sendet eine Nachricht, zum Beispiel ein _MQTT-Broker_.
+* ... eine Benutzerinteraktion, zum Beispiel ein _REST-API-Aufruf_.
+
+Beispiele für integrierte _Producer-Connectoren_ sind der _HTTP_-Connector oder der _MQTT_-Connector.
+
+== Consumer-Connectoren
+
+Ein _Consumer-Connector_ ist der Empfänger einer Nachricht.
+Die Nachricht wird dann vom Connector verarbeitet und eine Antwort wird an TRANSCONNECT zurückgesendet.
+Typische Aktionen von _Consumer-Connectoren_ sind...
+
+* ... das Speichern von Daten in einer Datenbank.
+* ... das Senden einer Nachricht an ein externes System.
+* ... komplexe Berechnungen.
+* ... die Umwandlung von Daten in ein neues Format, zum Beispiel von XML in PDF.
+
+Beispiele für integrierte _Consumer-Connectoren_ sind der _Database_-Connector oder der _Commandline_-Connector.
+
+== Adapter vs. Connector
+
+Das Connector SDK ist der Nachfolger des Adapter SDK.
+Die neue Connector-API bietet eine flexiblere und leistungsfähigere Möglichkeit, Connectoren zu implementieren.
+Die wichtigsten Verbesserungen sind...
+
+* ... bessere Isolierung der Connector-Abhängigkeiten.
+* ... verbesserte Testbarkeit.
+* ... geringere SDK-Größe.
+
+== Über diese Dokumentation
+
+Die Dokumentation richtet sich an erfahrene Java-Entwickler, die eigene Connectoren erstellen möchten.
+Dies kann dazu dienen, TRANSCONNECT mit spezieller Funktionalität zu erweitern oder eine Anbindung an ein bestimmtes System zu ermöglichen.
+
+In diesem Leitfaden erfahren Sie, wie Sie:
+
+* Ihre Entwicklungsumgebung für die Connector-Entwicklung einrichten
+* Sowohl Consumer- als auch Producer-Connectoren implementieren
+* Ihren Connector mit YAML konfigurieren
+* Fehler behandeln und den Lebenszyklus von Verbindungen verwalten
+* Ihren Connector in einer TRANSCONNECT-Umgebung bereitstellen
+* Die Architektur des Connector SDK verstehen
+
+Eine detaillierte API-Dokumentation finden Sie unter link:{attachmentsdir}/javadoc/index.html[Connector SDK API JavaDoc^].
+
+[#download-example-project]
+== Beispielprojekt herunterladen
+Um Ihnen den Einstieg in das Connector SDK zu erleichtern, haben wir ein vollständiges Beispielprojekt erstellt, das sowohl Producer- als auch Consumer-Connectoren in Aktion zeigt.
+
+[.download-section.text-center.p-4.my-4.bg-light.border.rounded]
+--
+[.btn.btn-primary.btn-lg.mt-2]
+link:{attachmentsdir}/tutorial-example.zip[icon:download[] Tutorial-Beispielprojekt herunterladen]
+--

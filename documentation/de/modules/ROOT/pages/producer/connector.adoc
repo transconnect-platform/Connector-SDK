@@ -1,0 +1,94 @@
+= Definieren eines Producer Connectors
+
+Das link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html[`IConnector`,window=_blank] ist der Hauptbestandteil des SDK.
+Es ist verantwortlich für das Herstellen der Verbindung zum externen System.
+Außerdem ist es die Klasse, die die Konfigurationseigenschaften definiert, die vom Benutzer gesetzt werden können.
+
+== Erstellen der Connector-Klasse
+
+Die Connector-Klasse kann neben der Connection-Klasse aus dem vorherigen Abschnitt erstellt werden.
+Wir nennen sie `DateTimeConnector` und sie implementiert das Interface link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnector.html[`ProducerConnector`,window=_blank].
+
+[source,java,indent=0]
+....
+@Connector
+public class DateTimeConnector implements ProducerConnector {
+    // methods to implement
+}
+....
+
+Die Annotation link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/extension/Connector.html[`@Connector`,window=_blank] wird verwendet, um die Klasse als Connector-Implementierung zu kennzeichnen.
+Später kann sie verwendet werden, um xref:extensions/introduction.adoc[Erweiterungen (extensions)] zu deklarieren, die vom Connector verwendet werden.
+
+== Erstellen des Connector-Descriptors
+
+Um einen Connector in TRANSCONNECT zu verwenden, muss er selbsterklärend sein.
+Er muss Informationen über sich selbst bereitstellen.
+
+Zum Beispiel:
+
+* den Namen des Connectors
+* die Version
+* die Konfigurationseigenschaften
+
+Diese Daten werden von der Klasse link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnectorDescriptor.html[`ProducerConnectorDescriptor`,window=_blank] bereitgestellt.
+Die Methode link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnector.html#getDescription()[`getDescription`,window=_blank] des Connectors gibt eine Instanz dieser Klasse zurück.
+Wir können das Builder-Pattern verwenden, um die Instanz zu erstellen.
+
+Der erste Teil enthält Metadaten über den Connector.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnector.java[tags=commonDescription]
+....
+
+NOTE: Alle Texte, die dem Benutzer angezeigt werden, sind vom Typ link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/LocalizedText.html[`LocalizedText`,window=_blank].
+Dies ermöglicht es, die Texte in verschiedenen Sprachen zu lokalisieren.
+
+Der zweite Teil enthält die Konfigurationseigenschaften.
+Er legt die Eigenschaften fest, die vom Benutzer gesetzt werden können.
+
+In unserem Beispiel definieren wir eine einzelne Konfigurationseigenschaft mit der ID `interval`.
+Sie wird verwendet, um das Intervall in Sekunden zwischen zwei Nachrichten zu bestimmen.
+Daher ist die Eigenschaft vom Typ `Integer` und hat einen Standardwert von `60`.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnector.java[tags=property]
+....
+
+NOTE: Im xref:reference/configuration.adoc[Referenz-Abschnitt] finden Sie weitere Informationen zu den Konfigurationseigenschaften.
+
+Im dritten Teil fügen wir alles zusammen und definieren das https://www.w3.org/TR/xmlschema-0/[XML Schema] für die erzeugten Nachrichten.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnector.java[tags=description]
+....
+
+Das Schema ist notwendig, damit der Benutzer weiß, was er vom Connector erwarten kann.
+
+NOTE: Der Descriptor kann groß und unübersichtlich werden, wenn es viele Konfigurationseigenschaften gibt.
+In diesem Fall wird empfohlen, den Descriptor in einer YAML-Datei zu definieren.
+Weitere Informationen finden Sie in der xref:extensions/yaml_descriptor.adoc[YAML-Descriptor-Erweiterung].
+
+== Instanziieren einer Connection
+
+Ein weiterer wichtiger Bestandteil des Connectors ist die Methode link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnector.html#createConnection(io.transconnect.connector.api.Context)[`createConnection`,window=_blank].
+Sie ist verantwortlich für das Herstellen der Verbindung zum externen System.
+Glücklicherweise haben wir die Connection-Klasse bereits aus dem vorherigen Abschnitt.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnector.java[tags=createConnection]
+....
+
+== Zusammenfassung
+
+In diesem Abschnitt haben wir Folgendes gelernt:
+
+* Wie man eine Connector-Klasse erstellt
+* Wie man einen Connector-Descriptor erstellt
+* Wie man eine Connection instanziiert
+
+Im nächsten Abschnitt beschäftigen wir uns mit der Bereitstellung (Deployment) des Connectors.

@@ -1,0 +1,143 @@
+= JAXB Extension
+
+The JAXB extension can be used to provide JAXB marshalling and unmarshalling for XML messages.
+This extension enables connectors to easily convert between XML messages and Java objects,
+with optional schema validation.
+
+The JAXB extension offers several benefits:
+
+* *Automatic XML serialization* and deserialization
+* *Schema validation* for XML messages
+* *Caching* for better performance
+* *Configurable MOXy bindings* for advanced customizations
+
+[TIP]
+====
+JAXB (Jakarta XML Binding) is an API and framework for binding XML schema and Java representations, allowing Java developers to process XML documents in Java applications.
+====
+
+== How to use the JAXB Extension?
+
+The following dependency must be added to the connector module's `build.gradle.kts` file:
+
+[source,kotlin]
+....
+dependencies {
+    implementation("io.transconnect.connector.extension:jaxb:$version")
+}
+....
+
+The extension can then be used directly in the connector implementation:
+
+[source,java,indent=0]
+....
+import io.transconnect.connector.extension.jaxb.JaxbExtension;
+
+public class MyConnectorConnection implements ConsumerConnection {
+    
+    private final JaxbExtension jaxbExtension;
+    
+    public MyConnectorConnection(Context context) {
+        this.jaxbExtension = this.context
+                .getExtension(JaxbExtension.class)
+                .orElseThrow(() -> new IllegalStateException("JaxbExtension is required but not available"));
+    }
+    
+    @Override
+    public void execute(URI interactionId, Message message, WritableMessage response)
+            throws TransconnectConnectorException {
+        
+        // Unmarshal XML to Java object
+        MyRequest request = jaxbExtension.unmarshalMessage(message, MyRequest.class, "schema/execute_in.xsd", null);
+        
+        // Process and marshal response
+        MyResponse responseObj = processRequest(request);
+        jaxbExtension.marshalMessage(response, responseObj, null);
+    }
+    
+    @Override
+    public void close() throws IOException {
+        jaxbExtension.clearCaches();
+    }
+}
+....
+
+== Defining JAXB Model Classes
+
+JAXB model classes must be annotated with appropriate annotations:
+
+[source,java,indent=0]
+....
+@XmlRootElement
+public class MyRequest {
+    @XmlElement
+    private String name;
+    
+    // getters/setters
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+....
+
+
+== Schema Validation
+
+The JAXB extension supports optional schema validation:
+
+[source,java,indent=0]
+....
+// With schema validation
+MyRequest request = jaxbExtension.unmarshalMessage(
+    message, 
+    MyRequest.class, 
+    "/schemas/my-request-schema.xsd",
+    "bindings/moxy-bindings.xml"
+);
+....
+
+The schema must be available as a resource in the classpath.
+
+== Performance Optimization
+
+The extension implements caching for better performance:
+
+* *JAXBContext Cache*: Reuses context instances
+* *Marshaller Cache*: Caches marshaller instances per class
+* *Unmarshaller Cache*: Caches unmarshaller instances per class
+
+IMPORTANT: Call `clearCaches()` when closing the connection to release resources.
+
+== MOXy Bindings
+
+The extension supports MOXy bindings for advanced XML configuration.
+Create a `bindings/moxy-bindings.xml` file in your resources:
+
+[source,xml]
+....
+<?xml version="1.0" encoding="UTF-8"?>
+<xml-bindings xmlns="http://www.eclipse.org/eclipselink/xsds/persistence/oxm">
+    <java-types>
+        <java-type name="com.example.MyRequest">
+            <xml-root-element name="request"/>
+        </java-type>
+    </java-types>
+</xml-bindings>
+....
+
+== Troubleshooting
+
+=== Common Issues
+
+[cols="1,3",options="header"]
+|====
+|Issue |Solution
+|JAXBException during unmarshalling |Check XML format and JAXB annotations
+|Schema not found |Ensure schema file is available in classpath
+|Validation errors |Check if XML conforms to schema
+|Performance issues |Use cache methods and call `clearCaches()` on shutdown
+|====

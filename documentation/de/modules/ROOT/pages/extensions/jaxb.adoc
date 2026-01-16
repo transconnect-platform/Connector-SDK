@@ -1,0 +1,143 @@
+= JAXB-Erweiterung
+
+Die JAXB-Erweiterung kann verwendet werden, um JAXB-Marshalling und -Unmarshalling für XML-Nachrichten umzusetzen.
+Diese Erweiterung ermöglicht es Connectoren, einfach zwischen XML-Nachrichten und Java-Objekten zu konvertieren,
+mit optionaler Schema-Validierung.
+
+Die JAXB-Erweiterung bietet mehrere Vorteile:
+
+* *Automatische XML-Serialisierung* und -Deserialisierung
+* *Schema-Validierung* für XML-Nachrichten
+* *Caching* für bessere Performance
+* *Konfigurierbare MOXy-Bindings* für erweiterte Anpassungen
+
+[TIP]
+====
+JAXB (Jakarta XML Binding) ist eine API und ein Framework zum Binden von XML-Schema und Java-Darstellungen, wodurch Java-Entwickler XML-Dokumente in Java-Anwendungen verarbeiten können.
+====
+
+== Wie wird die JAXB-Erweiterung verwendet?
+
+Die folgende Abhängigkeit muss zur Datei `build.gradle.kts` des Connector-Moduls hinzugefügt werden:
+
+[source,kotlin]
+....
+dependencies {
+    implementation("io.transconnect.connector.extension:jaxb:$version")
+}
+....
+
+Die Erweiterung kann dann direkt in der Connector-Implementierung verwendet werden:
+
+[source,java,indent=0]
+....
+import io.transconnect.connector.extension.jaxb.JaxbExtension;
+
+public class MyConnectorConnection implements ConsumerConnection {
+    
+    private final JaxbExtension jaxbExtension;
+    
+    public MyConnectorConnection(Context context) {
+        this.jaxbExtension = this.context
+                .getExtension(JaxbExtension.class)
+                .orElseThrow(() -> new IllegalStateException("JaxbExtension is required but not available"));
+    }
+    
+    @Override
+    public void execute(URI interactionId, Message message, WritableMessage response)
+            throws TransconnectConnectorException {
+        
+        // Unmarshal XML to Java object
+        MyRequest request = jaxbExtension.unmarshalMessage(message, MyRequest.class, "schema/execute_in.xsd", null);
+        
+        // Process and marshal response
+        MyResponse responseObj = processRequest(request);
+        jaxbExtension.marshalMessage(response, responseObj, null);
+    }
+    
+    @Override
+    public void close() throws IOException {
+        jaxbExtension.clearCaches();
+    }
+}
+....
+
+== JAXB-Modellklassen definieren
+
+JAXB-Modellklassen müssen mit entsprechenden Annotationen versehen werden:
+
+[source,java,indent=0]
+....
+@XmlRootElement
+public class MyRequest {
+    @XmlElement
+    private String name;
+    
+    // getters/setters
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+....
+
+
+== Schema-Validierung
+
+Die JAXB-Erweiterung unterstützt optionale Schema-Validierung:
+
+[source,java,indent=0]
+....
+// Mit Schema-Validierung
+MyRequest request = jaxbExtension.unmarshalMessage(
+    message, 
+    MyRequest.class, 
+    "/schemas/my-request-schema.xsd",
+    "bindings/moxy-bindings.xml"
+);
+....
+
+Das Schema muss als Ressource im Klassenpfad verfügbar sein.
+
+== Performance-Optimierung
+
+Die Erweiterung implementiert Caching für bessere Performance:
+
+* *JAXBContext-Cache*: Wiederverwendung von Context-Instanzen
+* *Marshaller-Cache*: Caching von Marshaller-Instanzen pro Klasse
+* *Unmarshaller-Cache*: Caching von Unmarshaller-Instanzen pro Klasse
+
+IMPORTANT: Rufen Sie `clearCaches()` beim Schließen der Verbindung auf, um Ressourcen freizugeben.
+
+== MOXy-Bindings
+
+Die Erweiterung unterstützt MOXy-Bindings für erweiterte XML-Konfiguration.
+Erstellen Sie eine Datei `bindings/moxy-bindings.xml` in Ihren Ressourcen:
+
+[source,xml]
+....
+<?xml version="1.0" encoding="UTF-8"?>
+<xml-bindings xmlns="http://www.eclipse.org/eclipselink/xsds/persistence/oxm">
+    <java-types>
+        <java-type name="com.example.MyRequest">
+            <xml-root-element name="request"/>
+        </java-type>
+    </java-types>
+</xml-bindings>
+....
+
+== Fehlerbehebung
+
+=== Häufige Probleme
+
+[cols="1,3",options="header"]
+|====
+|Problem |Lösung
+|JAXBException beim Unmarshalling |Überprüfen Sie XML-Format und JAXB-Annotationen
+|Schema nicht gefunden |Stellen Sie sicher, dass die Schema-Datei im Klassenpfad verfügbar ist
+|Validierungsfehler |Überprüfen Sie, ob XML dem Schema entspricht
+|Performance-Probleme |Verwenden Sie Cache-Methoden und rufen Sie `clearCaches()` beim Beenden auf
+|====

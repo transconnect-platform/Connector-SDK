@@ -1,0 +1,160 @@
+= Building a Consumer Connection
+
+A Connector implementation is made up of two parts: the Connection and the Connector itself.
+The Connection-Class contains the business logic, for example it will connect to a database or process incoming requests.
+Depending on whether a Producer or Consumer Connector is implemented, the Connection will handle different workflows.
+
+In our example, we will implement a simple Connection that counts characters in an XML message.
+The Connection will be created by the Connector-Class.
+We will look at the Connector-Class in the next section.
+
+For more details about class dependencies in the Connector SDK, see the xref:architecture.adoc[Connector SDK Architecture].
+
+== Create the Connection-Class
+
+Let's create a new Java class and implement the link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html[`ConsumerConnection`,window=_blank] interface.
+
+. Create a new package in the `src/main/java` directory.
++
+The package name should be `com.example.connector.consumer`.
+. Now we create a new Java class in the package with the name `CountCharactersConnection`.
+. Next, we add the link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html[`ConsumerConnection`,window=_blank] interface to the class.
++
+The ConsumerConnection interface is part of the Connector SDK and provides the necessary methods to create a Connection.
++
+To do this change the class definition:
++
+[source,java,indent=0]
+....
+public final class CountCharactersConnection implements ConsumerConnection {
+    // methods to implement
+}
+....
+
+== Implement the Connection methods
+
+The ConsumerConnection interface enforces the implementation of several methods.
+Additionally, the Connection must be able to get a link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Context.html[`Context`,window=_blank] object passed.
+This contains the configuration that should be used to establish the Connection.
+
+Example configuration properties are:
+
+* Host and port of an external system
+* Connection timeout
+* Processing options like whether to count whitespaces
+
+The most convenient way to pass the context to the connection is through the constructor.
+
+=== Constructor
+
+We implement a constructor that gets the Configuration passed and stores it in a field.
+We also initialize an XMLOutputFactory that will be used to create XML responses.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=constructor]
+....
+
+=== Connect
+
+Now we can implement the link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Connection.html#connect()[`connect`,window=_blank] method.
+It is used to establish the connection to the external system if needed.
+In our simple example, we don't need to establish any actual connection, so the method is empty.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=connect]
+....
+
+=== Execute
+
+The link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html#execute(java.net.URI,io.transconnect.connector.api.Message,io.transconnect.connector.api.WritableMessage)[`execute`,window=_blank] method is the heart of a ConsumerConnection. It processes an incoming message based on the requested interaction and produces a response.
+
+In our example, we check if the interaction is our supported "countCharacters" interaction. If it is, we retrieve the configuration parameter "countWhitespaces" to determine whether whitespace should be included in our character count, and then we execute the counting logic.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=execute]
+....
+
+In the `executeCountCharacters` method we extract the text from the incoming XML message and count the characters based on the configuration.
+Then the answer message is created and written in the `response` message body.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=executeCountCharacters]
+....
+
+IMPORTANT: Ensure that the `OutputStream` is closed after writing the response message.
+
+We use a `XmlEventReader` to extract the text between the "ROOT" tags in the incoming XML message.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=extractTextFromXml]
+....
+
+NOTE: There are other ways to process XML, such as using xref:extensions/jaxb.adoc[JAXB]. In this example, we kept it simple with direct XML event parsing.
+
+To count the characters inside the text, we use the `countCharacters` method.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=countCharacters]
+....
+
+If an unhandled error occurs during processing, TRANSCONNECT will abort processing of the message and log the error.
+The processing will not be retried.
+
+=== Connection check
+
+The `isConnected` method is used to check if the connection is still established.
+In our example, since we don't have any actual external connection, this always returns true.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=isConnected]
+....
+
+This method will be called by TRANSCONNECT to check if the connection is still alive or if a new connection must be created.
+
+=== Close Connection
+
+The `close` method is used to close the connection and clean up resources.
+In our example, there are no resources to release.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=close]
+....
+
+This method will be called by TRANSCONNECT to close the connection.
+It is a good practice to write the method defensively, so that it cannot produce any exceptions.
+
+TRANSCONNECT calls the `close` method in the following situations, among others:
+
+* When TRANSCONNECT is shutting down
+* When the connection is detected as inactive
+* When the connector is no longer used
+* When the connection properties have changed and the connection needs to be re-established
+* When an unhandled error has occurred in the connection
+
+== Comparison with Producer Connection
+
+Unlike a ProducerConnection that actively generates messages, a ConsumerConnection is passive and responds to incoming requests. The main differences are:
+
+1. ProducerConnection uses a `connect` method that takes a listener to report back messages, while ConsumerConnection's `connect` method takes no arguments.
+
+2. ConsumerConnection has an `execute` method to process incoming messages, which doesn't exist in ProducerConnection.
+
+3. ProducerConnection is responsible for creating and sending messages, while ConsumerConnection is responsible for processing incoming messages and creating responses.
+
+== Summary
+
+In this section we learned how to create a Connection for a Consumer Connector.
+
+* We have implemented a simple Connection that counts characters in XML messages.
+* We know how to get the configuration passed to the Connection.
+* We have seen how to implement the `execute` method to process incoming messages and create responses.
+
+In the next section we will create the Connector-Class that will create the Connection and handle the configuration.

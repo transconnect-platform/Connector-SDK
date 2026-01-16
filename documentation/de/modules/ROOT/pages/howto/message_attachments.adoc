@@ -1,0 +1,182 @@
+= Nachrichtenanhänge
+
+== Übersicht
+
+TRANSCONNECT-Nachrichten können Anhänge (Attachments) enthalten, wodurch Sie Binärdaten zusammen mit dem XML-Nachrichtenkörper senden und empfangen können. Dies ist nützlich für die Verarbeitung von:
+
+* Textdateien
+* Bilder
+* PDFs
+* Tabellenkalkulationen
+* Sonstige Binärinhalte
+
+Dieser Leitfaden zeigt, wie Sie mit Anhängen in Ihren Connector-Implementierungen arbeiten können.
+
+== Anhänge lesen
+
+=== Überprüfen, ob Anhänge vorhanden sind
+
+Bevor Sie auf einen Anhang zugreifen, prüfen Sie, ob er existiert:
+
+[source,java,indent=0]
+....
+// Get all attachment IDs
+Set<String> attachmentIds = message.getAttachmentIds();
+
+// Check if a specific attachment exists
+if (message.getAttachmentIds().contains("myAttachment")) {
+    // Process the attachment
+}
+....
+
+=== Anhang-Metadaten abrufen
+
+Sie können Metadaten wie z.B. die Größe eines Anhangs wie folgt abrufen:
+
+[source,java,indent=0]
+....
+long attachmentSize = message.getAttachmentSize(attachmentId);
+....
+
+=== Textinhalt aus Anhängen lesen
+
+Für textbasierte Anhänge verwenden Sie die folgende Methode:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=readTextAttachment]
+....
+
+=== Textdateien zeilenweise verarbeiten
+
+Sie können Textdateien zeilenweise verarbeiten:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=readTextFileLines]
+....
+
+=== Binäre Anhänge lesen
+
+Für Binärdateien verwenden Sie die folgende Methode:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=readBinaryAttachment]
+....
+
+== Anhänge schreiben
+
+=== Textanhänge erstellen
+
+Um einen Textanhang in Ihrer Antwort zu erstellen:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=writeTextAttachment]
+....
+
+=== Binäre Anhänge erstellen
+
+Um einen Binäranhang zu erstellen:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=writeBinaryAttachment]
+....
+
+== Erweitertes Beispiel: Zeichen in Anhängen zählen
+
+So erweitern Sie unseren Zeichenzähler, um auch Text aus Anhängen zu berücksichtigen:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=executeCountCharactersWithAttachments]
+....
+
+== Umgang mit großen Anhängen
+
+Bei großen Anhängen ist es besser, den Inhalt in Blöcken zu verarbeiten, anstatt alles auf einmal in den Speicher zu laden:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=processLargeAttachment]
+....
+
+== Häufige Anwendungsfälle
+
+=== Verarbeitung von E-Mails mit Anhängen
+
+[source,java,indent=0]
+....
+// Check for email body and attachments
+if (message.getAttachmentIds().contains("emailBody")) {
+    // Process email content
+    String emailText = readTextAttachment(message, "emailBody");
+
+    // Process each attachment
+    for (String attachmentId : message.getAttachmentIds()) {
+        if (attachmentId.startsWith("attachment_")) {
+            // Process each email attachment
+            byte[] attachmentData = readBinaryAttachment(message, attachmentId);
+            // Process based on content type
+        }
+    }
+}
+....
+
+=== Umgang mit Bildern
+
+[source,java,indent=0]
+....
+// Process an image attachment
+if (message.getAttachmentIds().contains("image")) {
+    byte[] imageData = readBinaryAttachment(message, "image");
+    // Process the image data
+    // Example: ImageIO.read(new ByteArrayInputStream(imageData));
+}
+....
+
+== Best Practices
+
+1. **Existenz immer prüfen**: Überprüfen Sie, ob ein Anhang existiert, bevor Sie darauf zugreifen
+2. **try-with-resources verwenden**: Stellen Sie sicher, dass Streams ordnungsgemäß geschlossen werden
+3. **Große Anhänge effizient verarbeiten**: Verarbeiten Sie große Anhänge in Blöcken
+4. **Angemessene Timeouts setzen**: Konfigurieren Sie bei der Verarbeitung großer Anhänge geeignete Timeouts
+5. **Anhangsinhalte validieren**: Implementieren Sie eine Validierung, um sicherzustellen, dass der Anhang den erwarteten Inhalt bzw. das erwartete Format hat
+
+== Fehlerbehebung
+
+[cols="1,3", options="header"]
+|===
+|Problem |Lösung
+|Attachment not found |Überprüfen Sie, ob die Attachment-ID korrekt ist und der Anhang in der Nachricht vorhanden ist
+|OutOfMemoryError |Verarbeiten Sie große Anhänge in Blöcken, anstatt sie vollständig in den Speicher zu laden
+|Zeichenkodierungsprobleme |Geben Sie beim Umwandeln von Bytes in Strings den richtigen Zeichensatz an (z. B. UTF-8, ISO-8859-1)
+|IOException beim Lesen |Stellen Sie eine geeignete Fehlerbehandlung sicher und erwägen Sie Wiederholungsmechanismen
+|===
+
+== Vollständige Implementierung
+
+Ein vollständiges Implementierungsbeispiel finden Sie in der Klasse `CountCharactersConnection`:
+
+[source,java,indent=0]
+....
+public final class CountCharactersConnection implements ConsumerConnection {
+    // Methods to implement
+
+    // Reading attachments
+    private String readTextAttachment(Message message, String attachmentId) { ... }
+    private List<String> readLinesFromAttachment(Message message, String attachmentId) { ... }
+    private byte[] readBinaryAttachment(Message message, String attachmentId) { ... }
+
+    // Writing attachments
+    private void writeTextAttachment(WritableMessage response, String attachmentId, String content) { ... }
+    private void writeBinaryAttachment(WritableMessage response, String attachmentId, byte[] data) { ... }
+
+    // Processing attachments
+    private void executeCountCharactersWithAttachments(Message message, WritableMessage response,
+                                                     boolean countWhitespaces) { ... }
+    private void processLargeAttachment(Message message, String attachmentId) { ... }
+}
+....

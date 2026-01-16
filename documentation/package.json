@@ -1,0 +1,22 @@
+{
+  "scripts": {
+    "prebuild": "node scripts/prebuild.js",
+    "build": "npm run prebuild && npm run build-en && npm run build-de && npm run zip-attachments && npm run copy-index",
+    "build-en": "antora --fetch --redirect-facility=gitlab --attribute kroki-server-url=${KROKI_SERVER_URL:-http://localhost:8000} --attribute kroki-fetch-diagram=true --to-dir=../public/en antora-playbook-en.yml",
+    "build-de": "antora --fetch --redirect-facility=gitlab --attribute kroki-server-url=${KROKI_SERVER_URL:-http://localhost:8000} --attribute kroki-fetch-diagram=true --to-dir=../public/de antora-playbook-de.yml",
+    "zip-attachments": "node site/scripts/zip-attachments.js",
+    "copy-index": "node scripts/copy-index.js",
+    "dev": "http-server ../public -p 9000"
+  },
+  "devDependencies": {
+    "antora": "3.1.9",
+    "cpy-cli": "^4.2.0",
+    "archiver": "^7.0.1",
+    "http-server": "^14.1.1",
+    "asciidoctor-kroki": "^0.18.1"
+  },
+  "dependencies": {
+    "@antora/collector-extension": "^1.0.1",
+    "@antora/lunr-extension": "^1.0.0-alpha.10"
+  }
+}

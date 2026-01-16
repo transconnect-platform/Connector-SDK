@@ -1,0 +1,49 @@
+= Extensions
+
+Extensions are a powerful way to extend the functionality of the connector SDK.
+They allow you to add new features, modify existing behavior, or provide additional configuration options for connectors.
+
+== What are extensions?
+
+Extensions offer a way to easily add custom functionality to the connector SDK.
+They can be used to modify existing connectors or to add new features.
+Extensions can be used to enhance the capabilities of connectors without having to repeatedly write the same code.
+
+There are currently two main types of extensions available in the connector SDK:
+
+Functional Extensions:: These extensions provide functionality that can be used by connectors.
+
+Descriptor Extensions:: These extensions modify the connector descriptor.
+In most cases, they add new properties to the connector descriptor, but they can also modify existing properties or remove properties.
+Descriptor extensions can also read configuration values before a connection is created, which allows them to provide additional functionality based on the configuration.
+
+== How to use an extension?
+
+To use an extension in your connector, you need to add the extension dependency to your connector's `build.gradle.kts` file.
+Therefore, see the documentation of the specific extension you want to use.
+
+Additionally, you need to register the extension in your connector's link:../{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html[`IConnector`,window=_blank] class.
+You do this by adding the extension class to the `extensions` parameter of the link:../{attachmentsdir}/javadoc/io/transconnect/connector/api/extension/Connector.html[`@Connector`,window=_blank] annotation.
+
+.Example of the registration of an extension in your connector
+[source,java,indent=0]
+....
+@Connector(extensions = {
+    @Extension(ExampleExtension.class)
+})
+public class MyConnector implements ProducerConnector {
+    // Connector implementation
+}
+....
+
+This guarantees that the extension is loaded and can be accessed via the link:../{attachmentsdir}/javadoc/io/transconnect/connector/api/Context.html[`Context`,window=_blank] object.
+
+The extension's features are then available within your connector’s methods through this `context`.
+
+.Access the extension functionality in your connector
+[source,java,indent=0]
+....
+context.getExtension(ExampleExtension.class).doSomething();
+....
+
+Unless stated otherwise, a new instance of the extension is created for each call to link:../{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html#createConnection(io.transconnect.connector.api.Context)[`Connector#createConnection`,window=_blank], meaning it is bound to a single connection.

@@ -1,0 +1,133 @@
+= Validator
+
+== Überblick
+
+Das TRANSCONNECT Validator-System bietet eine leistungsstarke Möglichkeit, sicherzustellen, dass Eigenschaftswerte bestimmte Anforderungen erfüllen. Es wurde vereinfacht und verwendet drei zentrale Validator-Typen: `REGEX`, `RANGE` und `DATETIME`, um eine Balance zwischen Flexibilität und Benutzerfreundlichkeit zu gewährleisten.
+
+[TIP]
+====
+Validatoren werden als Teil der Eigenschaften-Konfigurationen definiert. Siehe xref:/reference/configuration.adoc#properties[Eigenschaften-Konfiguration] für Details zur Strukturierung von Eigenschaften.
+====
+
+== Zentrale Validator-Typen
+[#validator-types]
+[cols="1,3,2", options="header"]
+|====
+|Validator-Typ |Zweck |Kompatible Eigenschaftstypen
+|REGEX |Musterbasierte Zeichenfolgenvalidierung |TEXT, SECRET
+|RANGE |Numerische Wertevalidierung |INTEGER, FLOAT
+|DATETIME |Validierung von Datums- und Zeitformaten |TEXT
+|====
+
+=== REGEX Validator
+Der REGEX Validator verwendet reguläre Ausdrücke, um Zeichenfolgen zu validieren. Er ist sehr flexibel und kann Muster für verschiedene Zeichenfolgenformate erzwingen.
+
+[source,yaml]
+....
+# Einfache Zeichenfolgenvalidierung
+property:
+  type: TEXT
+  validator:
+    type: REGEX
+    config:
+      pattern: "[a-zA-Z0-9]+"
+
+# Passwortvalidierung
+property:
+  type: SECRET
+  validator:
+    type: REGEX
+    config:
+      pattern: "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$"
+....
+
+=== RANGE Validator
+Der RANGE Validator stellt sicher, dass numerische Werte innerhalb akzeptabler Grenzen liegen. Er unterstützt sowohl einfache Min-/Max-Bereiche als auch mehrere, nicht zusammenhängende Bereiche.
+
+[source,yaml]
+....
+# Einfacher Ganzzahlenbereich
+property:
+  type: INTEGER
+  validator:
+    type: RANGE
+    config:
+      min: 0
+      max: 100
+
+# Mehrere Ganzzahlenbereiche
+property:
+  type: INTEGER
+  validator:
+    type: RANGE
+    config:
+      ranges:
+        1: 5    # Erlaubt Werte zwischen 1-5
+        10: 20  # Erlaubt Werte zwischen 10-20
+        50: 75  # Erlaubt Werte zwischen 50-75
+....
+
+=== DATETIME Validator
+Der DATETIME Validator stellt sicher, dass die Texteingabe einem bestimmten Datums-/Zeitformat entspricht.
+
+[source,yaml]
+....
+property:
+  type: TEXT
+  validator:
+    type: DATETIME
+    config:
+      format: "yyyy-MM-dd HH:mm:ss"
+....
+
+== Eigenschaftsabhängigkeiten
+
+TRANSCONNECT unterstützt bedingte Beziehungen zwischen Eigenschaften mittels der dependsOn-Funktion. Dadurch können Eigenschaften vom Wert anderer Eigenschaften abhängig gemacht werden.
+[source,yaml]
+....
+properties:
+  - id: "retryEnabled"
+    type: "BOOLEAN"
+    defaultValue: false
+    required: true
+
+  - id: "retryCount"
+    type: "INTEGER"
+    defaultValue: 3
+    required: true
+    dependsOn:
+      - property: "retryEnabled"
+        value: true
+    validator:
+      type: RANGE
+      config:
+        min: 1
+        max: 10
+....
+
+[#dependency-operations]
+.Verfügbare Abhängigkeitsoperationen
+[cols="1,2", options="header"]
+|====
+|Operation |Beschreibung
+|EQUALS |Eigenschaftswert muss dem angegebenen Wert entsprechen
+|NOT_EQUALS |Eigenschaftswert darf nicht dem angegebenen Wert entsprechen
+|GREATER_THAN |Eigenschaftswert muss größer als der angegebene Wert sein
+|GREATER_OR_EQUALS |Eigenschaftswert muss größer oder gleich dem angegebenen Wert sein
+|LOWER_THAN |Eigenschaftswert muss kleiner als der angegebene Wert sein
+|LOWER_OR_EQUALS |Eigenschaftswert muss kleiner oder gleich dem angegebenen Wert sein
+|====
+
+[TIP]
+====
+Abhängigkeiten können die Benutzerfreundlichkeit erheblich verbessern, indem Eigenschaften erst angezeigt werden, wenn sie relevant sind, oder nur in bestimmten Szenarien als verpflichtend markiert werden.
+====
+
+== Fehlerbehandlung
+
+Das Validator-System liefert spezifische Fehlermeldungen für:
+
+* Ungültige Kombinationen von Eigenschaftstyp und Validator
+* Fehlerhafte Validierungsmuster
+* Werte außerhalb akzeptabler Bereiche
+* Ungültige Datums-/Zeitformate

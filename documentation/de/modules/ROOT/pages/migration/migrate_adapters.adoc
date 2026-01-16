@@ -1,0 +1,146 @@
+= Adapter zu Connector migrieren
+
+Dieser Leitfaden bietet eine umfassende Schritt-für-Schritt-Anleitung zur Migration Ihrer bestehenden TRANSCONNECT Adapter auf unser modernes, schlankes Connector-Framework.
+Während sich TRANSCONNECT weiterentwickelt, setzen wir uns dafür ein, Ihnen robustere, flexiblere und benutzerfreundlichere Werkzeuge bereitzustellen.
+Das neue Connector-Framework stellt einen bedeutenden Fortschritt in diesem Bestreben dar.
+
+== Warum migrieren?
+
+Die Migration von der alten Adapter-Architektur zum neuen Connector-Framework bietet mehrere entscheidende Vorteile:
+
+Vereinfachte Entwicklung:: Das neue Framework verfügt über eine intuitivere API, reduziert Boilerplate-Code und vereinfacht die Entwicklung und Wartung Ihrer Integrationen.
+Schlanke Implementierung:: Die neue Architektur stellt nur die für Ihre individuelle Integration notwendigen Komponenten bereit.
+Erweiterungen (Extensions) sind einfach zu verwendende Ergänzungen, um Ihren Connector zu erweitern, ohne Code zu duplizieren.
+Bessere Testbarkeit:: Testen Sie Ihre Connectors mit Unit- und Integrationstests, ohne einen TRANSCONNECT starten zu müssen.
+Zukunftssicherheit:: Das Connector-Framework ist die Zukunft der Integration innerhalb von TRANSCONNECT.
+Durch die Migration stellen Sie sicher, dass Ihre Lösungen mit kommenden Funktionen und Plattform-Erweiterungen kompatibel bleiben.
+
+Dieser Leitfaden erläutert die konzeptionellen Unterschiede zwischen Adaptern und Connectors und bietet eine Schritt-für-Schritt-Anleitung für den Migrationsprozess.
+
+Legen wir los
+
+== Funktionsverfügbarkeit
+
+Das Connector SDK ist ein aktiv weiterentwickeltes Framework, das leichtgewichtig und erweiterbar konzipiert ist.
+Es deckt die häufigsten Integrationsszenarien ab, erreicht jedoch noch nicht die vollständige Funktionsgleichheit mit dem bisherigen Adapter-Framework.
+
+Wir erweitern die Fähigkeiten des SDKs kontinuierlich – sowohl im Kern-Framework als auch durch optionale Erweiterungen.
+Bevor Sie mit der Migration beginnen, empfehlen wir, den aktuellen Funktionsumfang zu prüfen, um sicherzustellen, dass er den Anforderungen Ihres Projekts entspricht und um Ihre Migrationsstrategie entsprechend zu planen.
+
+[#_key_terminology_changes]
+== Wichtige Terminologieänderungen
+
+Obwohl die Kernkonzepte zur Steuerung des Datenflusses ähnlich sind, führt das Connector-Framework eine aktualisierte Terminologie ein, die intuitiver ist und sich an modernen Integrationsmustern orientiert.
+Das Verständnis dieser Änderungen ist der erste Schritt im Migrationsprozess.
+
+Die folgende Tabelle ordnet die Begriffe des alten Adapter-Modells ihren neuen Entsprechungen im Connector-Framework zu.
+
+.Adapter-zu-Connector-Terminologie-Mapping
+[cols="1,1",options="header"]
+|===
+| Begriff im alten Adapter | Neuer Begriff im Connector
+
+| Adapter
+| Connector
+
+| Inbound Adapter
+| Producer Connector
+
+| Outbound Adapter
+| Consumer Connector
+|===
+
+Die wichtigste Änderung ist die Umstellung von „Inbound/Outbound“ auf „Producer/Consumer“:
+
+* Ein **Producer Connector** (früher Inbound Adapter) ist dafür verantwortlich, *Nachrichten* aus einem externen System zu *produzieren* und *in* TRANSCONNECT zu bringen.
+* Ein **Consumer Connector** (früher Outbound Adapter) ist dafür verantwortlich, *Nachrichten* aus TRANSCONNECT zu *konsumieren* und *an* ein externes System zu senden.
+
+Diese Namensgebung spiegelt die jeweilige Rolle der Komponenten im Integrationsworkflow genauer wider und entspricht der Standard-Terminologie in ereignisgesteuerten Architekturen (event-driven architectures).
+
+== API- und Strukturunterschiede
+
+Über die in <<_key_terminology_changes>> genannten Terminologieänderungen hinaus führt das Connector-Framework ein moderneres und flexibleres API-Design ein.
+Das Verständnis dieser strukturellen Veränderungen ist entscheidend für eine reibungslose Migration.
+
+Die wichtigsten Änderungen gegenüber der alten Adapter-API sind:
+
+Fokus auf Interfaces statt abstrakter Klassen:: Während Adapter das Erweitern bestimmter abstrakter Klassen erforderten, werden Connectors durch die Implementierung klar definierter, fokussierter Interfaces erstellt.
+Dieser moderne Ansatz bietet Ihnen größere architektonische Freiheit.
+Sie sind nicht mehr an eine bestimmte Klassenhierarchie gebunden und können bei Bedarf eigene Basisklassen erstellen.
+
+Zentralisierte Metadaten mit `ConnectorDescriptor`:: Alle Metadaten, die einen Adapter definierten – wie Name, Konfigurationseigenschaften und unterstützte Interaktionen – sind nun im link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/ConnectorDescriptor.html[`ConnectorDescriptor`,window=_blank] zusammengefasst.
+Dieses Objekt dient als Manifest für Ihren Connector und bietet eine einzige, klare und deklarative Definition seiner Fähigkeiten und Anforderungen.
+Damit werden die zuvor verstreuten programmatischen Definitionen des alten Adapter-Modells ersetzt.
+Der Descriptor kann entweder in xref:page$reference/configuration.adoc[Code] oder in xref:page$extensions/yaml_descriptor.adoc[YAML] erstellt werden.
+
+Deklarative Interaktionen:: Connectors vereinfachen die Handhabung verschiedener Interaktionen.
+Anstatt – wie bei alten Adaptern erforderlich – für jede Operation separate `execute<INTERACTION>()`-Methoden zu erstellen, nutzt das neue Framework einen schlankeren Prozess.
+Zuerst deklarieren Sie alle unterstützten Interaktionen im link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/ConnectorDescriptor.html[`ConnectorDescriptor`,window=_blank].
+Dann implementieren Sie eine einzige link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html#execute(java.net.URI,io.transconnect.connector.api.Message,io.transconnect.connector.api.WritableMessage)[`execute()`,window=_blank]-Methode in Ihrer link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html[`ConsumerConnection`,window=_blank].
+Wird eine Interaktion ausgelöst, wird deren ID an diese Methode übergeben, sodass Sie einfach zur passenden Geschäftslogik weiterleiten können.
+Dieser Ansatz zentralisiert Ihren Code, reduziert Boilerplate und macht Ihren Connector leichter wartbar.
+
+Vereinfachtes Modell (keine Subtypen):: Das Connector-Framework entfernt das Konzept der „Connection-Subtypen“, das im alten Adapter-Modell existierte.
+Diese Änderung fördert ein klareres und expliziteres Design.
+Um Varianten, die zuvor durch Subtypen abgebildet wurden, zu handhaben, nutzen Sie eine der folgenden Strategien:
+* **Erstellen Sie separate Connectors für unterschiedliche Protokolle:** Wenn die Varianten mit grundlegend verschiedenen Systemen oder Protokollen kommunizieren (z. B. Zugriff auf ein lokales Dateisystem vs. Amazon S3-Bucket), sollten Sie für jede Variante einen eigenen Connector erstellen.
+Dadurch bleibt der Zweck jedes Connectors fokussiert und die Wartung wird erleichtert.
+* **Verwenden Sie Konfigurationseigenschaften für Protokollvarianten:** Wenn die Varianten dasselbe Kernprotokoll nutzen, sich aber in der Konfiguration unterscheiden (z. B. Unterstützung mehrerer Authentifizierungsmethoden für dieselbe API), sollten Sie einen einzigen, flexiblen Connector erstellen.
+Über die Konfigurationseigenschaften kann der Benutzer das gewünschte Verhalten auswählen.
+So wird verwandte Logik in einer Komponente gebündelt.
+
+== Überblick über den Migrationsprozess
+
+In diesem Abschnitt wird der grundlegende Ablauf zur Umwandlung eines alten Adapters in einen modernen Connector beschrieben.
+Jede Migration ist einzigartig, aber diese Schritte bieten einen allgemeinen Fahrplan zur Orientierung.
+
+Für detaillierte, codebasierte Anleitungen empfehlen wir dringend unsere Tutorials zur Erstellung eines xref:page$consumer/intro.adoc[Consumer Connector] oder eines xref:producer/intro.adoc[Producer Connector].
+
+. **Projektabhängigkeiten aktualisieren**
++
+Fügen Sie zunächst die xref:producer/setup.adoc[Connector SDK-Abhängigkeiten] zur Build-Konfiguration Ihres Projekts hinzu.
+Dadurch stehen Ihnen die neuen Connector-APIs im Code zur Verfügung.
+
+. **Die zentrale Connector-Klasse erstellen**
++
+Erstellen Sie eine neue Klasse, die link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnector.html[`ProducerConnector`,window=_blank] (für einen ehemaligen Inbound Adapter) oder link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnector.html[`ConsumerConnector`,window=_blank] (für einen ehemaligen Outbound Adapter) implementiert.
+Diese Klasse fungiert als Haupteinstiegspunkt und Factory für Ihre Integration.
+
+. **Den Connector Descriptor definieren**
++
+Implementieren Sie in Ihrer Connector-Klasse die Methode link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html#getDescription()[`getDescription`,window=_blank], die eine Implementierung von link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/ConnectorDescriptor.html[`ConnectorDescriptor`,window=_blank] zurückgibt.
+Dieser Descriptor ist ein Manifest, das deklarativ die Metadaten Ihres Connectors – wie Name und Konfigurationseigenschaften – definiert.
+Sie können diesen entweder in xref:page$reference/configuration.adoc[Code] oder in xref:page$extensions/yaml_descriptor.adoc[YAML] erstellen.
+
+. **Die Connection-Klasse implementieren**
++
+Erstellen Sie eine neue Klasse, die das entsprechende link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Connection.html[`Connection`,window=_blank]-Interface (link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnection.html[`ProducerConnection`,window=_blank] oder link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html[`ConsumerConnection`,window=_blank]) implementiert.
+Hier befindet sich die Laufzeitlogik Ihrer Integration.
+
+. **Die Geschäftslogik migrieren**
++
+Übertragen Sie die zentrale Integrationslogik aus Ihrem alten Adapter in die neue link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Connection.html[`Connection`,window=_blank]-Klasse.
++
+--
+* Bei einem **Outbound Adapter** wird diese Logik typischerweise in die link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html#execute(java.net.URI,io.transconnect.connector.api.Message,io.transconnect.connector.api.WritableMessage)[`execute()`,window=_blank]-Methode der xref:consumer/connection.adoc[ConsumerConnection] verschoben.
+* Bei einem **Inbound Adapter** wird die Logik zum Abrufen von Daten in die link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Connection.html#connect()[`connect()`,window=_blank]-Methode der xref:producer/connection.adoc[ProducerConnection] übertragen.
+--
+
+. **Die Factory-Methode für die Connection implementieren**
++
+Implementieren Sie in Ihrer zentralen Connector-Klasse (aus Schritt 2) die link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html#createConnection(io.transconnect.connector.api.Context)[Factory-Methode,window=_blank], die für das Erzeugen von Instanzen Ihrer neuen link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Connection.html[`Connection`,window=_blank]-Klasse (aus Schritt 4) zuständig ist.
+TRANSCONNECT ruft diese Methode auf, wann immer Ihre Integration ausgeführt werden soll.
+
+== Zusammenfassung
+
+Dieser Leitfaden bietet einen umfassenden Überblick über die Migration vom alten Adapter-Framework zum modernen Connector SDK.
+
+Wenn Sie den beschriebenen Schritten folgen, können Sie Ihre bestehenden Integrationen so umgestalten, dass Sie von den wichtigsten Vorteilen der neuen Architektur profitieren: einer intuitiveren, interface-basierten API, vereinfachter Konfiguration durch den `ConnectorDescriptor` und verbesserter Testbarkeit.
+
+Die wichtigsten Änderungen, die Sie sich merken sollten, sind:
+
+* Die Umstellung der Terminologie von **Inbound/Outbound Adapters** auf **Producer/Consumer Connectors**.
+* Der Wechsel von abstrakten Klassen zu einem flexibleren, interface-basierten Design.
+* Die Zusammenführung aller Metadaten in einen deklarativen link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/ConnectorDescriptor.html[`ConnectorDescriptor`,window=_blank].
+
+Mit diesen Konzepten und der Schritt-für-Schritt-Anleitung sind Sie nun bestens gerüstet, um Ihre TRANSCONNECT-Integrationen zu modernisieren – robuster, wartbarer und zukunftssicher.

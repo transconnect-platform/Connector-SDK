@@ -1,0 +1,119 @@
+= Connector SDK Developer Documentation
+:toc: left
+:icons: font
+:source-highlighter: highlight.js
+
+== Overview
+
+This repository contains the documentation for the Connector SDK. This guide helps you build and run the documentation locally using Antora.
+
+== Prerequisites
+
+* *Node.js* - LTS version recommended
+* *npm* - Comes with Node.js installation
+* Optional: https://www.docker.com/[Docker] and the https://hub.docker.com/r/yuzutech[Kroki Docker Images] for local diagram generation
+
+== Compatibilty
+
+Note: the compatibility information is valid only until the Connector SDK is officially released. Once the release has happened, compatibility information is part of the official SDK documentation.
+
+The following table lists which version of Transconnect is compatible with which version of the Connector SDK.
+
+
+|===
+|Transconnect Version |Connector SDK Version
+
+|4.2.0
+|1.0
+|===
+
+
+== Quick Start
+
+[source,console,subs="+attributes"]
+....
+# to start the Kroki Docker Containers
+$ docker-compose up -d
+
+# Install dependencies
+$ npm install
+
+# Build the documentation
+$ npm run build
+
+# Start the local server (available at http://localhost:8080)
+$ npm run serve
+....
+
+== Detailed Instructions
+
+=== 1. Installing Dependencies
+
+Run this command in the repository root directory to install all required packages:
+
+[source,console]
+....
+$ npm install
+....
+
+=== 2. Building the Documentation
+
+The build command processes all content and generates the static site:
+
+[source,console]
+....
+$ npm run build
+....
+
+=== 3. Starting the Local Server
+
+Once built, start a local server to view the documentation:
+
+[source,console]
+....
+$ npm run serve
+....
+
+Then open your browser and navigate to http://localhost:8080
+
+
+You might see an error messages that looks similar to this:
+
+[quote]
+....
+Skipping structurizr block. GET http://localhost:8000/structurizr ...
+....
+
+This will happen if the Kroki Containers are not started on your local machine. Kroki is used to generate Diagrams and Charts. If you don't
+need the charts you can use the generated output even when these warnings occur. In order to generate the diagrams start the Kroki Docker
+Containers locally with the following command.
+
+[source,console]
+....
+$ docker-compose up -d
+....
+
+[IMPORTANT]
+.Remember to stop the Kroki Docker Container
+====
+Stop the docker containers once you finished your work with the following command:
+[source,console]
+....
+$ docker-compose down
+....
+====
+
+
+== Troubleshooting
+
+[cols="1,2", options="header"]
+|===
+|Issue |Solution
+|Port 8080 already in use |Change the port in the npm script or close the application using port 8080
+|Build errors |Verify your Antora configuration file is correctly set up
+|===
+
+== Additional Information
+
+* Changes to documentation files require rebuilding to see updates
+* The server automatically serves the latest built version

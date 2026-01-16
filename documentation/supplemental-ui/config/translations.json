@@ -1,0 +1,38 @@
+{
+  "header": {
+    "en": {
+      "documentation": "Documentation",
+      "search": "Search",
+      "language": "English",
+      "more": "More",
+      "community": "Community",
+      "mail_support": "Mail to Support",
+      "company": "SQL Projekt AG"
+    },
+    "de": {
+      "documentation": "Dokumentation",
+      "search": "Suche",
+      "language": "German",
+      "more": "Mehr",
+      "community": "Community",
+      "mail_support": "Mail an den Support",
+      "company": "SQL Projekt AG"
+    }
+  },
+  "footer": {
+    "en": {
+      "copyright": "© {year} SQL Projekt AG",
+      "imprint": "Imprint",
+      "privacy": "Privacy Policy",
+      "contact": "Contact",
+      "disclaimer": "Disclaimer: This content was generated with the assistance of AI and may contain inaccuracies or errors. Always verify critical information from reliable sources."
+    },
+    "de": {
+      "copyright": "© {year} SQL Projekt AG",
+      "imprint": "Impressum",
+      "privacy": "Datenschutz",
+      "contact": "Kontakt",
+      "disclaimer": "Hinweis: Dieser Inhalt wurde mit Unterstützung künstlicher Intelligenz erstellt und kann Ungenauigkeiten oder Fehler enthalten. Bitte überprüfen Sie kritische Informationen anhand verlässlicher Quellen."
+    }
+  }
+}

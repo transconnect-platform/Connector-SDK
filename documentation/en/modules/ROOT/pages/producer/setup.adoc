@@ -1,0 +1,3 @@
+:connectorName: DateTimeProducerConnector
+:packageFragment: producer
+include::partial$connector-setup.adoc[]

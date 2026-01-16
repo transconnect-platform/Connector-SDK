@@ -1,0 +1,174 @@
+= Setup environment
+// expects the following attributes are set before including it
+// :connectorName: --> simple class name of the connector
+// :packageFragment: --> last package fragments of the connector package
+
+
+To develop connectors, you need to set up your development environment.
+This includes installing the necessary tools and libraries.
+
+The following prerequisites are required:
+
+* Java Development Kit (JDK) 17, for example, https://openjdk.org/[OpenJDK 17]
+* https://gradle.org/[Gradle 8.8] or higher
+
+Additionally, it is recommended to use an Integrated Development Environment (IDE) like https://www.jetbrains.com/idea/[IntelliJ IDEA], https://code.visualstudio.com/[Visual Studio Code] or https://www.eclipse.org/[Eclipse].
+
+Once everything is installed and set up we can start to create the connector project.
+
+== Connector Gradle project
+
+To create a new connector project, we create a Gradle project.
+Gradle is a build automation tool that is used to compile, test, and package the connector.
+Create a new directory for the project and navigate into it, for example with bash.
+
+[source,console,subs="attributes+"]
+....
+$ mkdir {connectorName}
+$ cd {connectorName}
+....
+
+== Generate the project structure
+
+Now we can create a new Gradle project with the following command:
+
+[source,console,subs="attributes+"]
+....
+$ gradle init \
+  --java-version 17 \
+  --dsl kotlin \
+  --project-name {connectorName} \
+  --package com.example.connector.{packageFragment} \
+  --test-framework junit \
+  --no-split-project \
+  --use-defaults \
+  --type java-library
+....
+
+This command creates a new Gradle project with the following settings:
+
+* use Java 17 to compile the code
+* the gradle script is written in Kotlin
+* the name of the project is `{connectorName}`
+* it creates a package structure with the name `com.example.connector.{packageFragment}`
+* the test framework is JUnit
+* the project is not split into multiple subprojects
+* it uses default settings for the project
+* It creates a java-library project, but we will change this later to a Java Web Archive (war) project
+
+The directory that was used to create the project now contains the following files and folders:
+
+.File tree after the Gradle project creation
+[source,subs="attributes+"]
+....
+│   .gitattributes
+│   .gitignore
+│   gradlew <1>
+│   gradlew.bat <1>
+│   settings.gradle.kts <2>
+│
+├───gradle <3>
+│   │   libs.versions.toml
+│   │
+│   └───wrapper
+│           gradle-wrapper.jar
+│           gradle-wrapper.properties
+│
+└───lib
+    │   build.gradle.kts <4>
+    │
+    └───src
+        ├───main
+        │   ├───java
+        │   │   └───com
+        │   │       └───example
+        │   │           └───connector
+        │   │               └───{packageFragment}
+        │   │                       Library.java <5>
+        │   │
+        │   └───resources
+        └───test
+            ├───java
+            │   └───com
+            │       └───example
+            │           └───connector
+            │               └───{packageFragment}
+            │                       LibraryTest.java <5>
+            │
+            └───resources
+....
+
+<1> These files are gradle wrapper scripts that can be used to build the project without having Gradle installed.
+<2> The settings file for the Gradle project.
+It is used to configure the project name.
+<3> The Gradle wrapper and configuration files.
+This folder is used by Gradle to store its configuration files.
+<4> The build file for the library.
+It contains the dependencies and the build configuration.
+<5> Some example files that were created by the Gradle init command.
+They can be deleted.
+
+For more information about Gradle and the project structure, see the https://docs.gradle.org/current/userguide/userguide.html[Gradle documentation].
+
+== Adapt the build file
+
+Now we need to adapt the `build.gradle.kts` file to create a Java Web Archive (war) project.
+Open the file in your preferred IDE or editor and change the following lines:
+
+. *Change the project type to a Java Web Archive (war) project*
++
+Therefor we remove the `java-library` plugin and add the `war` plugin.
++
+[source,kotlin]
+....
+plugins {
+    war
+}
+....
+. *Add Maven Central repository*
++
+To use the TRANSCONNECT libraries, we need to ensure that Maven Central is configured in the build file.
++
+[source,kotlin]
+....
+repositories {
+    mavenCentral()
+}
+....
++
+. *Remove example dependencies*
++
+Add the Connector SDK dependency and remove the example dependencies from the build file.
+Keep only the JUnit dependency.
++
+[source,kotlin]
+....
+dependencies {
+    providedCompile("io.transconnect.connector:api:<VERSION>")
+
+    providedCompile("org.slf4j:slf4j-api:1.7.36")
+}
+....
++
+The Connector SDK API is necessary to implement the connector.
+You can find the latest version on https://central.sonatype.com/artifact/io.transconnect.connector/api[Maven Central].
+
+== Build the project
+
+Now we can build the project with the following command:
+
+.Build and test the project with gradle
+[source,console]
+....
+$ gradle clean build
+....
+
+This command compiles the code, runs the tests, and creates a war file in the `build/libs` directory.
+
+== Summary
+
+* In this section of the guide, we have set up the development environment for a new connector project.
+* We have created a new Gradle project and adapted the build file to create a Java Web Archive (war) project.
+* We learned how to build the project and execute tests.
+
+In the next section, we will implement the Connection.

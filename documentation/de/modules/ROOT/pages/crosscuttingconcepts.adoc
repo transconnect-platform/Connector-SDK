@@ -1,0 +1,14 @@
+= Querschnittskonzepte
+
+== Temporäre Dateien und Verzeichnisse
+
+Bei der Implementierung von Connectoren kann es notwendig sein, temporäre Dateien oder Verzeichnisse zu erstellen.
+
+Über die TRANSCONNECT Konfiguration (`tc.ini`) gibt es bereits einen definierten Pfad für temporäre Daten, der genutzt werden sollte, um Konsistenz und einfache Wartung zu gewährleisten.
+
+Diesen Pfad können Sie in Ihrem Connector über den Kontext wie folgt abrufen:
+
+[source,java,indent=0]
+....
+String tempDirPath = context.getTempDirectory();
+....

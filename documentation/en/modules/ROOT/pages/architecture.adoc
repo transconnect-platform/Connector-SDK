@@ -1,0 +1,115 @@
+= Connector SDK Architecture
+
+== Introduction
+
+The TRANSCONNECT Connector SDK provides a standardized framework for integrating external systems with the TRANSCONNECT platform. This document outlines the architecture, core components, and interaction patterns of the SDK.
+
+=== Key Concepts
+
+The SDK is built around two primary connector types:
+
+[cols="1,4", options="header"]
+|===
+|Connector Type |Purpose
+|*Consumer Connectors* |Receive and process messages from TRANSCONNECT, interacting with external systems to fulfill requests
+|*Producer Connectors* |Monitor external systems and generate messages that are sent to TRANSCONNECT
+|===
+
+Both connector types share a common design philosophy:
+
+* Clear separation between connector and connection
+* Standardized message handling
+* Configuration-driven behavior
+* Lifecycle management
+
+== System Context
+
+This diagram illustrates how connectors integrate external systems with TRANSCONNECT:
+
+[plantuml,format=svg]
+....
+include::partial$uml/connector-context.puml[]
+....
+
+This simplified system view shows how:
+
+1. Producer connectors detect changes in external data sources
+2. Messages flow through the TRANSCONNECT core
+3. Consumer connectors process requests and interact with external systems
+
+== Core Components
+
+The SDK is organized around these foundational components:
+
+[plantuml,format=svg]
+....
+include::partial$uml/core-components.puml[]
+....
+
+This high-level view shows the relationships between the major component groups:
+
+* Connectors create and manage connections
+* Connections use context to determine behavior
+* The Message API provides standardized message handling
+
+== Interface Details
+
+=== Consumer Connector API
+
+[plantuml,format=svg]
+....
+include::partial$uml/consumer-api.puml[]
+....
+
+=== Producer Connector API
+
+[plantuml,format=svg]
+....
+include::partial$uml/producer-api.puml[]
+....
+
+=== Message API
+
+[plantuml,format=svg]
+....
+include::partial$uml/message-api.puml[]
+....
+
+== Connector Lifecycles
+
+=== Consumer Connector Lifecycle
+
+[plantuml,format=svg]
+....
+include::partial$uml/consumer-lifecycle.puml[]
+....
+
+=== Producer Connector Lifecycle
+
+[plantuml,format=svg]
+....
+include::partial$uml/producer-lifecycle.puml[]
+....
+
+== Best Practices
+
+When implementing connectors with the SDK, follow these patterns:
+
+1. **Separation of Concerns**
+* Connectors create connections and provide metadata
+* Connections contain business logic and handle message processing
+
+2. **Error Handling**
+* Use try-with-resources for proper resource cleanup
+* Wrap external exceptions in link:../_attachments/javadoc/io/transconnect/connector/api/TransconnectConnectorException.html[`TransconnectConnectorException`,window=_blank]
+* Log meaningful error messages
+
+3. **Configuration Management**
+* Define clear property names with helpful descriptions
+* Provide sensible defaults where possible
+* Validate configuration early
+
+4. **Connection Lifecycle**
+* Ensure proper cleanup in the `close()` method
+* Implement thread-safe connection state checking
+* Design connections to be stateless where possible

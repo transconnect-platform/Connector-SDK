@@ -1,0 +1,57 @@
+= Create a Consumer Connector
+
+This guide explains how to create a consumer connector using the Connector SDK.
+We will create a simple connector that counts characters in XML messages.
+
+== The Character Counter Consumer Connector
+
+The Character Counter Consumer Connector is a simple connector that processes incoming XML messages and counts the characters in the text content.
+It has only a single configuration option: whether to count whitespace characters in addition to letters.
+
+.The Character Counter Consumer Connector Configuration
+[cols="2,3,2,1",options="header"]
+|===
+| Configuration Key
+| Description
+| Default Value
+| Required
+
+| countWhitespaces
+| Controls whether whitespace characters should be included in the count.
+| false
+| No
+|===
+
+When the connector receives a message, it extracts the text content from the ROOT element of the XML document, counts the characters according to the configuration, and returns a response with the count.
+
+.An example input message for the Character Counter Consumer Connector
+[source,xml]
+....
+<ROOT>Hello World! This is a test message.</ROOT>
+....
+
+.The corresponding output message
+[source,xml]
+....
+<ROOT>
+    <COUNT>31</COUNT>
+</ROOT>
+....
+
+If the `countWhitespaces` configuration option is set to `false`, only letters are counted (23 in this example). If set to `true`, all characters including whitespaces and punctuation are counted (31 in this example).
+
+The connector defines a single interaction, `countCharacters`, which performs the character counting operation.
+
+.The Character Counter Consumer Connector Interactions
+[cols="2,3",options="header"]
+|===
+| Interaction ID
+| Description
+
+| countCharacters
+| Counts the characters in the text content of the input message
+|===
+
+Now that we have a basic understanding of the connector, let's start with the project creation.
+
+include::partial$download-sample.adoc[]

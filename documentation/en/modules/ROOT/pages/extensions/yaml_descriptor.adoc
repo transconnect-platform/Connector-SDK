@@ -1,0 +1,108 @@
+= YAML Descriptor
+
+The YAML descriptor extension can be used to describe the connector configuration in a YAML format.
+The connector descriptor can get overwhelming when described in Java code.
+The extension allows defining the connector descriptor in a YAML file, which is easier to read and maintain.
+
+YAML files instead of Java code, offer several advantages:
+
+* *Separation of configuration from implementation*
+* *Improved readability* for non-developers
+* *Consistent format* across different connector types
+* *External configuration* possibilities without code changes
+
+[TIP]
+====
+For a complete reference of configuration components and properties, see xref:/reference/configuration.adoc[TRANSCONNECT Connector Configuration].
+====
+
+== How to use the YAML descriptor extension?
+
+The following dependency must be added to the `build.gradle.kts` file of the connector module:
+
+[source,kotlin]
+....
+dependencies {
+    implementation("io.transconnect.connector.extension:yaml-descriptor:$version")
+}
+....
+
+Please see the latest version of the `yaml-descriptor` extension in the Maven repository.
+
+The extension can then be used directly in the connector class.
+
+[source,java,indent=0]
+....
+@Override
+public ConsumerConnectorDescriptor getDescription() {
+    return ConnectorDescriptionUtils.createConsumerDescriptionFromYaml(
+                    this.getClass().getResourceAsStream("/consumerConnector.yaml"));
+}
+....
+
+In this example the `consumerConnector.yaml` file is located in the resources directory of the connector module.
+So it is available in the classpath of the connector.
+
+NOTE: The YAML descriptor extension is also available for producer connectors.
+
+== Directory Structure
+
+A typical connector project using YAML configuration looks like this:
+
+[source]
+....
+src/
+├── main/
+│   ├── java/
+│   │   └── com/example/connector/
+│   │       ├── consumer/
+│   │       │   └── CountCharactersConnector.java
+│   │       └── producer/
+│   │           └── DateTimeConnector.java
+│   └── resources/
+│       ├── CountCharactersConnector.yaml
+│       └── DateTimeConnector.yaml
+....
+
+== YAML Configuration Examples
+
+Below are examples of YAML configuration files for different connector types.
+
+.CountCharactersConnector.yaml
+[source,yaml]
+....
+include::example$tutorial-example/src/main/resources/CountCharactersConnector.yaml[line=1..1]
+....
+
+.DateTimeConnector.yaml
+[source,yaml]
+....
+include::example$tutorial-example/src/main/resources/DateTimeConnector.yaml[line=1..1]
+....
+
+[NOTE]
+====
+The structure of these YAML files directly corresponds to the configuration model explained in the xref:/reference/configuration.adoc#configuration-elements[Configuration Elements] section.
+====
+
+== Troubleshooting
+
+=== Common Issues
+
+[cols="1,3",options="header"]
+|====
+|Problem |Solution
+|YAML file not found |Verify the file path and name in the `getResourceAsStream` call
+|Invalid YAML format |Use a YAML validator to check for syntax errors
+|Missing required fields |Ensure all required fields are present in your YAML
+|Type conversion errors |Check that property types match expected values
+|====
+
+=== Validation Errors
+
+If you encounter validation errors:
+
+1. Verify that property types match the expected data types
+2. Check that any referenced URIs are correctly formatted
+3. Ensure validator configurations are correct
+4. Verify that property dependencies are properly defined

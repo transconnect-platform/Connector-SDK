@@ -1,0 +1,33 @@
+specVersion: 1.0.0
+common:
+  type: "urn:transconnect:connector:count-characters-consumer"
+  version: 1.0.0
+  vendor: SQL Projekt AG
+  displayName:
+    - locale: en
+      message: Count Characters Connector
+  description:
+    - locale: en
+      message: A simple connector for counting letters and whitespaces
+  labels: [ "sample", "character-counter" ]
+properties:
+  - id: countWhitespaces
+    displayName:
+      - locale: en
+        message: Count Whitespaces
+    description:
+      - locale: en
+        message: Controls whether whitespaces should be counted
+    type: BOOLEAN
+    defaultValue: false
+    required: false
+interactions:
+  - id: "countCharacters"
+    displayName:
+      - locale: en
+        message: Count Characters
+    description:
+      - locale: en
+        message: Counts letters and whitespaces in a text
+    inMessageXsd: /com/example/connector/consumer/in.xsd
+    outMessageXsd: /com/example/connector/consumer/out.xsd

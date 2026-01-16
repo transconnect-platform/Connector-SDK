@@ -1,0 +1,274 @@
+/* This file is registered in head-styles.hbs, otherwise it does not get picked up. */
+:root {
+    --custom-navbar-height: 56px;
+    --tc-primary: #086375;
+    --link-color: #086375;
+    --link-hover-color: #003d49;
+    --navbar-background: #ffffff;
+
+    /* ===============*/
+    --navbar-font-color: #086375;
+    --navbar_hover-background: #e3e5e5;
+    --navbar-menu-background: #ffffff;
+    --navbar-menu-font-color: #086375;
+    --navbar-menu_hover-background: #e3e5e5;
+}
+
+.navbar-brand .navbar-item:first-child {
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.tc-logo {
+    margin-right: 8px;
+}
+
+/* Customization of Navbar */
+.navbar {
+    background-color: white;
+    box-shadow: 0 1px 5px #0003, 0 2px 2px #00000024, 0 3px 1px -2px #0000001f;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.navbar-brand {
+    padding-left: 8px;
+}
+
+.navbar-item {
+    color: var(--link-color);
+}
+
+.navbar-brand .navbar-item {
+    color: var(--navbar-font-color);
+}
+
+/**********************************************************/
+
+.navbar {
+    background: var(--navbar-background);
+    color: var(--navbar-font-color);
+}
+
+.navbar-dropdown {
+    right: 0;
+    left: unset;
+}
+
+.main-nav-selected {
+    background-color: #086375 !important;
+    color: white !important;
+    margin: 8px;
+    border-radius: 8px;
+}
+
+.navbar-burger span {
+    background-color: var(--navbar-font-color);
+}
+
+.navbar-brand .navbar-item {
+    color: var(--navbar-font-color);
+}
+
+.navbar-divider {
+    background-color: var(--navbar-menu-border-color);
+}
+
+
+.navbar-item,
+.navbar-link {
+    color: var(--navbar-menu-font-color);
+}
+
+footer.footer {
+    color: #4a4a4a;
+}
+
+.footer a {
+    color: #4a4a4a;
+    font-weight: 600;
+}
+
+.footer-content {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+}
+  
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+  
+.footer-ai-translation-hint {
+    position: absolute;
+    right: 0;
+    max-width: 300px;
+    font-size: 0.75em;
+    color: #636363;
+    white-space: normal;
+    text-align: left;
+    padding-left: 1rem;
+    line-height: 1.2;
+}
+
+/* Hide the "prev/next" caoptions that Antora adds */
+nav.pagination .prev::before {
+    display: none;
+}
+
+nav.pagination .next::before {
+    display: none;
+}
+
+
+@media screen and (max-width: 1023.5px) {
+
+    .nav-and-search {
+        flex-grow: 1;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column-reverse;
+    }
+
+    .navbar-menu {
+        background: var(--navbar-menu-background);
+    }
+
+
+    .doc {
+        max-width: 48rem;
+    }
+
+    .navbar-menu a.navbar-item:hover,
+    .navbar-menu .navbar-link:hover {
+        background: var(--navbar-menu_hover-background);
+    }
+
+    .main-nav {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+
+    .nav-and-search {
+        flex-grow: 1;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .nav {
+        top: var(--custom-navbar-height);
+    }
+
+    .doc {
+        max-width: 53rem;
+    }
+
+    .navbar-menu {
+        padding-left: 1rem;
+        flex-grow: 1;
+    }
+
+    .navbar-dropdown .navbar-item {
+        padding: .5rem 1rem;
+    }
+
+    .main-nav {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .navbar-brand {
+        flex: unset;
+    }
+
+    .navbar-end {
+        display: flex;
+        flex-grow: 1;
+        justify-content: space-between;
+        flex-direction: row;
+    }
+
+    .navbar-end>.navbar-item,
+    .navbar-end .navbar-link {
+        color: var(--navbar-font-color);
+    }
+
+    .navbar-end>a.navbar-item:hover,
+    .navbar-end .navbar-link:hover,
+    .navbar-end .navbar-item.has-dropdown:hover .navbar-link {
+        background: var(--navbar_hover-background);
+        color: var(--navbar-font-color);
+    }
+
+    .navbar-dropdown {
+        background: var(--navbar-menu-background);
+        border: 1px solid #c6c6c6;
+        border-radius: 2px;
+    }
+
+    .navbar-dropdown a.navbar-item:hover {
+        background: var(--navbar-menu_hover-background);
+    }
+}
+
+/**********************************************************/
+
+/* Overwrite navbar height everywhere */
+
+body {
+    padding-top: var(--custom-navbar-height);
+}
+
+.navbar {
+    height: var(--custom-navbar-height);
+}
+
+.nav-container {
+    top: var(--custom-navbar-height);
+}
+
+/* Hide because we do not need it and it is not accessible */
+.home-link {
+    display: none;
+}
+
+/* Move to right because we dont display the home link icon */
+.breadcrumbs {
+    margin-left: 12px;
+}
+
+.toolbar {
+    top: var(--custom-navbar-height);
+}
+
+
+/* Overwrite link colors everywhere */
+.doc a {
+    font-weight: 600;
+    color: var(--link-color);
+}
+
+.doc a:hover {
+    color: var(--link-hover-color)
+}
+
+.toc .toc-menu a.is-active {
+    border-left-color: var(--link-color);
+}
+
+.toc .toc-menu a:hover {
+    color: var(--link-color)
+}
+
+.nowrap {
+  white-space: nowrap;
+}

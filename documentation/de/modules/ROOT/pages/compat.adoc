@@ -1,0 +1,12 @@
+= Kompatibilität
+
+Bitte prüfen Sie die folgende Tabelle, um Informationen darüber zu erhalten, welche Version von Transconnect welche Version des Connector SDK unterstützt.
+
+IMPORTANT: fix the table below before release.
+
+|===
+|Transconnect-Version |Connector SDK-Version
+
+|4.3.0
+|1.0
+|===

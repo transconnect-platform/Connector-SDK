@@ -1,0 +1,28 @@
+specVersion: 1.0.0
+common:
+  type: "urn:transconnect:connector:datetime-producer"
+  version: 1.0.0
+  vendor: SQL Projekt AG
+  displayName:
+    - locale: en
+      message: DateTime Producer Connector
+  description:
+    - locale: en
+      message: The Producer Connector creates messages with a timestamp in a configurable interval
+  labels: [ "sample", "producer", "DateTime" ]
+properties:
+  - id: interval
+    displayName:
+      - locale: en
+        message: Interval
+    description:
+      - locale: en
+        message: Time interval to create new messages - Unit in seconds
+    type: INTEGER
+    defaultValue: 60
+    required: true
+    validator:
+      type: RANGE
+      config:
+        min: 1
+        max: 1000000

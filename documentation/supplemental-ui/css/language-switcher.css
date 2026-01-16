@@ -1,0 +1,59 @@
+/* Language Switcher Styles */
+.language-switcher {
+  margin: 0 0.5rem;
+}
+
+.language-switcher select {
+  background-color: transparent;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  color: #086375;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.language-switcher select:hover {
+  border-color: #086375;
+}
+
+.language-switcher select:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.125em rgba(8, 99, 117, 0.25);
+}
+
+/* Option to style the language switcher as a button group instead */
+.language-switcher-buttons {
+  display: flex;
+  margin: 0 0.5rem;
+}
+
+.language-switcher-buttons button {
+  background-color: transparent;
+  border: 1px solid #dbdbdb;
+  color: #4a4a4a;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.language-switcher-buttons button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.language-switcher-buttons button:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.language-switcher-buttons button.active {
+  background-color: #086375;
+  border-color: #086375;
+  color: white;
+}
+
+.language-switcher-buttons button:hover:not(.active) {
+  background-color: #f5f5f5;
+  border-color: #b5b5b5;
+}

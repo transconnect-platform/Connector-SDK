@@ -1,0 +1,52 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam backgroundColor white
+skinparam ArrowColor #486090
+
+' Better visual distinction
+skinparam interface {
+  BorderColor #FF9800
+  BackgroundColor #FFF3E0
+}
+
+interface "<<interface>>\nMessage" as M {
+  +getId(): Long
+  +getMessageType(): String
+  +getXmlBody(): XMLEventReader
+  +getAttachmentIds(): Collection<String>
+  +getAttachment(String): InputStream
+}
+
+interface "<<interface>>\nWritableMessage" as WM {
+  +getBodyOutputStream(): OutputStream
+  +getAttachmentOutputStream(String): OutputStream
+}
+
+interface "<<interface>>\nMessageFactory<T extends Message>" as MF {
+  +createMessage(): T
+}
+
+WM -up-|> M : extends
+MF ..> M : creates
+
+note bottom of M
+  <b>Read Interface</b>
+  Provides read access to
+  message content and attachments
+end note
+
+note right of WM
+  <b>Write Interface</b>
+  Adds capability to create
+  and modify messages
+end note
+
+note left of MF
+  <b>Factory</b>
+  Creates new message
+  instances
+end note
+@enduml

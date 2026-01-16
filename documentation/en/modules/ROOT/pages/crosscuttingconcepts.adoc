@@ -1,0 +1,14 @@
+= Crosscutting Concepts
+
+== Temporary files and directories
+
+When implementing connectors it may be necessary to create temporary files or directories.
+
+The TRANSCONNECT configuration (`tc.ini`) already defines a path for temporary data which should be used to ensure consistency and ease of maintenance.
+
+You can retrieve this path in your connector from the context as follows:
+
+[source,java,indent=0]
+....
+String tempDirPath = context.getTempDirectory();
+....

@@ -1,0 +1,25 @@
+antora:
+  extensions:
+    - require: "@antora/lunr-extension"
+    - require: "@antora/collector-extension"
+site:
+  title: Connector SDK
+  start_page: connector-sdk-doc::introduction.adoc
+runtime:
+  log:
+    failure_level: fatal
+  fetch: false
+content:
+  sources:
+    - url: ../
+      start_path: documentation/en
+asciidoc:
+  attributes:
+    attachmentsdir: attachments
+    page-pagination: ''
+  extensions:
+    - asciidoctor-kroki
+ui:
+  supplemental_files: ./supplemental-ui
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable

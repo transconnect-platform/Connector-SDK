@@ -1,0 +1,71 @@
+= Introduction
+
+Connectors are the key integration components in TRANSCONNECT.
+They enable communication between external systems and the platform.
+Using the Connector SDK you can:
+
+Produce messages:: that are sent into TRANSCONNECT for further processing.
+Consume messages:: from TRANSCONNECT, process them, and return a response.
+
+== Producer Connectors
+
+A producer connector is the trigger for a process.
+It creates a new message and hands it over to TRANSCONNECT for further processing.
+
+Sources for new messages can be...
+
+* ... a timer that triggers at regular intervals.
+* ... a timer that triggers at a specific time.
+* ... an external system sends a message, for example a _MQTT broker_.
+* ... a user interaction, for example a _REST API call_.
+
+Examples for built-in _Producer Connectors_ are the _HTTP_ connector or the _MQTT_ connector.
+
+== Consumer Connectors
+
+A _Consumer Connector_ is the receiver of a message.
+The message will then be processed by the connector and a response will be sent back to the TRANSCONNECT.
+Typical actions of _Consumer Connectors_ are...
+
+* ... storing data in a database.
+* ... sending a message to an external system.
+* ... complex calculations.
+* ... transform data into a new format, for example from XML into PDF.
+
+Examples for built-in _Consumer Connectors_ are the _Database_ connector or the _Commandline_ connector.
+
+== Adapter vs. Connector
+
+The Connector SDK is the successor of the Adapter SDK.
+The new Connector API provides a more flexible and powerful way to implement connectors.
+Main improvements are...
+
+* ... better isolation of connector dependencies.
+* ... improved testability.
+* ... smaller SDK size.
+
+== About this documentation
+
+The documentation is written for experienced Java developers who want to create their own connectors.
+This can be possible to enrich the TRANSCONNECT with special functionality or to connect to a specific system.
+
+In this guide, you will learn how to:
+
+* Set up your development environment for connector development
+* Implement both consumer and producer connectors
+* Configure your connector using YAML
+* Handle errors and manage connection lifecycles
+* Deploy your connector to a TRANSCONNECT environment
+* Understand the Connector SDK architecture
+
+For detailed API documentation, see the link:{attachmentsdir}/javadoc/index.html[Connector SDK API JavaDoc^].
+
+[#download-example-project]
+== Download Example Project
+To help you quickly understand the Connector SDK, we've created a complete example project that demonstrates both producer and consumer connectors in action.
+
+[.download-section.text-center.p-4.my-4.bg-light.border.rounded]
+--
+[.btn.btn-primary.btn-lg.mt-2]
+link:{attachmentsdir}/tutorial-example.zip[icon:download[] Download Tutorial Example Project]
+--

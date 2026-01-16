@@ -1,0 +1,108 @@
+= Testen
+
+Beim Testen eines Connectors sollten Tests geschrieben werden, um sicherzustellen, dass sich der Connector wie erwartet verhält. Entsprechend der Testpyramide kann zwischen drei Arten von Tests unterschieden werden:
+
+* Unit-Tests
+* Integrationstests und
+* End-to-End-Tests.
+
+== Unit-Tests
+
+Unit-Tests können einfach mit Hilfe von Test-Frameworks wie JUnit implementiert werden. Das Mocking einzelner Komponenten wird üblicherweise durch ein Mocking-Framework wie Mockito durchgeführt. Der Fokus von Unit-Tests sollte darauf liegen, einzelne Komponenten isoliert zu testen. Das bedeutet auch, dass externe Abhängigkeiten wie das Zielsystem, mit dem der Connector sich verbindet, gemockt werden sollten, um sicherzustellen, dass die Tests schnell und zuverlässig sind.
+
+== Integrationstests
+
+Integrationstests werden verwendet, um die Interaktion zwischen dem Connector und dem Zielsystem zu testen. Der Fokus von Integrationstests liegt darauf sicherzustellen, dass sich der Connector wie erwartet verhält, wenn er mit einem echten Zielsystem interagiert.
+
+=== Testen von Consumer-Connectoren
+
+Die grundlegende Schnittstelle eines Consumer-Connectors ist eine TRANSCONNECT-Nachricht. Eine Eingabenachricht wird an den Connector gesendet, der Connector verarbeitet die Nachricht und gibt eine Ergebnisnachricht zurück. Die Ergebnisnachricht wird dann mit einer erwarteten Ergebnisnachricht verglichen.
+
+Das folgende Sequenzdiagramm zeigt den Test-Workflow für Consumer-Connectoren:
+
+.Test-Workflow für Consumer-Connectoren
+[plantuml]
+....
+IntegrationTest -> Configuration: create
+Configuration --> IntegrationTest: configuration
+opt create extensions
+IntegrationTest -> Extension: create
+Extension --> IntegrationTest: extension
+end
+IntegrationTest -> Context: create with configuration and optional extensions
+Context --> IntegrationTest: context
+IntegrationTest -> Connector: create
+Connector --> IntegrationTest: connector
+IntegrationTest -> Connector: create connection with context
+Connector -> Connection: create
+Connection --> IntegrationTest: connection
+IntegrationTest -> Connection: connect
+IntegrationTest -> Message: create
+Message --> IntegrationTest: input message
+IntegrationTest -> WritableMessage: create
+WritableMessage --> IntegrationTest: result message
+IntegrationTest -> Connection: execute(interaction URI, input message, result message)
+note over IntegrationTest: Check result message against expected result message
+....
+
+Das xref:introduction.adoc#download-example-project[`tutorial-example`]-Projekt enthält ein Beispiel eines einfachen Integrationstests für einen Consumer-Connector. Der Test befindet sich im `src/test/java`-Verzeichnis des Projekts.
+
+=== Testen von Producer-Connectoren
+
+Die grundlegende Schnittstelle eines Producer-Connectors ist eine TRANSCONNECT-Nachricht. Sobald eine Bedingung erfüllt ist (z.B. nach einem festen Zeitintervall oder wenn ein Ereignis aus einem externen System eintritt), erzeugt der Connector eine Nachricht, die von einem regulären TRANSCONNECT-Prozess verarbeitet werden kann.
+
+Das folgende Sequenzdiagramm zeigt den Test-Workflow für Producer-Connectoren:
+
+.Testablauf für Producer-Connectoren
+[plantuml]
+....
+IntegrationTest -> Configuration: create
+Configuration --> IntegrationTest: configuration
+opt create extensions
+IntegrationTest -> Extension: create
+Extension --> IntegrationTest: extension
+end
+IntegrationTest -> Context: create with configuration and optional extensions
+Context --> IntegrationTest: context
+IntegrationTest -> Connector: create
+Connector --> IntegrationTest: connector
+IntegrationTest -> Connector: create connection with context
+Connector -> Connection: create
+Connection --> IntegrationTest: connection
+IntegrationTest -> MessageFactory: create
+MessageFactory --> IntegrationTest: message factory
+IntegrationTest -> ProducerConnectorListener: create
+ProducerConnectorListener --> IntegrationTest: listener
+IntegrationTest -> Connection: connect with message factory and listener
+...Wait for messages produced by the connector...
+note over IntegrationTest: Check result message collected in listener against expected result message
+....
+
+=== Test Fixtures
+
+Die Test Fixtures des Moduls `io.transconnect.connector:api` enthalten Klassen, die verwendet werden können, um das grundlegende Setup für Tests von Connectoren zu erstellen.
+
+Um die Test Fixtures im Testcode verwenden zu können, muss die folgende Abhängigkeit in der Datei `build.gradle.kts` hinzugefügt werden:
+
+[source,gradle]
+....
+dependencies {
+    testImplementation(testFixtures("io.transconnect.connector:api:0.0.1"))
+}
+....
+
+`MockContext`:: ist eine Mock-Implementierung des `Context`-Interfaces. Sie kann verwendet werden, um einen Kontext zu erstellen, der dann zur Erstellung eines Connectors genutzt wird.
+
+`MockConfiguration`:: ist eine Mock-Implementierung des `Configuration`-Interfaces. Sie kann verwendet werden, um eine Connector-Konfiguration zu erstellen, die dann zur Erstellung eines `Context` verwendet wird.
+
+`MockMessage`:: ist eine Mock-Implementierung des `Message`-Interfaces. Sie kann verwendet werden, um eine Nachricht zu erstellen, die dann als Eingabenachricht für den Connector während der Ausführung einer Interaktion verwendet wird.
+
+`MockWritableMessage`:: ist eine Mock-Implementierung des `WritableMessage`-Interfaces. Sie kann verwendet werden, um eine beschreibbare Nachricht zu erstellen, die dann vom Connector während der Ausführung einer Interaktion gefüllt wird. Nach der Testausführung kann der Inhalt dieser Nachricht gegen eine erwartete Ergebnisnachricht geprüft werden.
+
+`MessageUtils`:: enthält Hilfsmethoden, die die Nachrichtenbehandlung im Testcode vereinfachen sollen.
+
+== End-to-End-Tests
+
+End-to-End-Tests werden verwendet, um die vollständige Interaktion zwischen TRANSCONNECT, dem Connector und dem Zielsystem zu testen.
+
+Dafür muss der Connector in eine TRANSCONNECT-Installation deployed werden. Das Testen kann dann innerhalb des TRANSCONNECT Managers durchgeführt werden, entweder durch Verwendung des Test-Nachrichten-Assistenten oder durch Implementierung von Testprozessen, die den Connector verwenden.

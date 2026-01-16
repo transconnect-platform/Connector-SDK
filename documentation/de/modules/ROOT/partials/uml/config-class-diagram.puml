@@ -1,0 +1,140 @@
+@startuml
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 11
+skinparam linetype ortho
+skinparam groupInheritance true
+skinparam packageStyle rectangle
+
+' Use meaningful colors
+skinparam class {
+  BackgroundColor #f8f8f8
+  ArrowColor #5c6bc0
+  BorderColor #283593
+}
+
+skinparam interface {
+  BackgroundColor #e3f2fd
+  BorderColor #1976d2
+}
+
+skinparam enum {
+  BackgroundColor #e0f2f1
+  BorderColor #00897b
+}
+
+' Legend
+note as Legend
+  <b>Legend</b>
+  --
+  <color #1976d2>◆</color> Interface
+  <color #283593>■</color> Class
+  <color #00897b>●</color> Enumeration
+endnote
+
+' Classes with organization
+package "Descriptor" {
+  class CommonConnectorDescriptor {
+    +URI type
+    +String[] labels
+    +String version
+    +String vendor
+    +LocalizedText[] displayName
+    +LocalizedText[] description
+  }
+
+  class LocalizedText {
+    +Locale locale
+    +String message
+  }
+}
+
+package "Connector Types" {
+  class ConsumerConnector {
+    +CommonConnectorDescriptor common
+    +IConnectorProperty[] properties
+    +Interaction[] interactions
+  }
+
+  class ProducerConnector {
+    +CommonConnectorDescriptor common
+    +IConnectorProperty[] properties
+    +URI producedMessageXsd
+    +URI resultMessageXsd
+  }
+
+  class Interaction {
+    +URI id
+    +LocalizedText[] displayName
+    +LocalizedText[] description
+    +URI inMessageXsd
+    +URI outMessageXsd
+  }
+}
+
+package "Configuration" {
+  interface IConnectorProperty {
+    +String getId()
+    +LocalizedText[] getDisplayName()
+    +LocalizedText[] getDescription()
+    +ConnectorPropertyType getType()
+    +Serializable getDefaultValue()
+    +boolean isRequired()
+  }
+
+  class ConnectorProperty {
+    +String id
+    +LocalizedText[] displayName
+    +LocalizedText[] description
+    +ConnectorPropertyType type
+    +Serializable defaultValue
+    +boolean required
+    +ValidatorConfig validator
+    +PropertyDependency[] dependsOn
+  }
+
+  class SelectConnectorProperty {
+    +String id
+    +LocalizedText[] displayName
+    +LocalizedText[] description
+    +ConnectorPropertyType type
+    +String defaultValue
+    +boolean required
+    +SelectableEntry[] entries
+  }
+
+  enum ConnectorPropertyType {
+    TEXT
+    SECRET
+    INTEGER
+    FLOAT
+    BOOLEAN
+    SELECT
+  }
+
+  interface Configuration {
+    +URI getId()
+    +Collection<String> getKeys()
+    +Optional<String> getString(String key)
+    +Optional<Double> getDouble(String key)
+    +Optional<Long> getLong(String key)
+    +Optional<Boolean> getBoolean(String key)
+  }
+}
+
+' Relationships with better layout
+CommonConnectorDescriptor --> LocalizedText : contains
+ConsumerConnector --> CommonConnectorDescriptor : has
+ProducerConnector --> CommonConnectorDescriptor : has
+ConsumerConnector --> Interaction : contains
+Interaction --> LocalizedText : contains
+ConnectorProperty ..|> IConnectorProperty : implements
+SelectConnectorProperty ..|> IConnectorProperty : implements
+ConsumerConnector --> IConnectorProperty : contains
+ProducerConnector --> IConnectorProperty : contains
+IConnectorProperty --> LocalizedText : contains
+ConnectorProperty --> ConnectorPropertyType : uses
+SelectConnectorProperty --> ConnectorPropertyType : uses
+@enduml
