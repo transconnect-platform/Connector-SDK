@@ -1,7 +1,7 @@
 # TransConnect Connector SDK
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.transconnect.connector/api)](https://central.sonatype.com/artifact/io.transconnect.connector/api)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java Version](https://img.shields.io/badge/Java-17%2B-blue)](https://openjdk.org/)
 
 > A powerful and extensible SDK for building custom connectors for the TRANSCONNECT integration platform.
@@ -134,7 +134,6 @@ The built documentation will be available in the `documentation/site/` directory
 ```
 transconnect-connector-sdk/
 ├── api/                          # Core SDK API
-├── connector-tck/                # Technology Compatibility Kit
 └── documentation/                # Antora documentation
 ```
 
@@ -189,7 +188,7 @@ If you find a bug or have a feature request:
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
