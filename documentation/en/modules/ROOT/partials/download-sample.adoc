@@ -1,0 +1,10 @@
+== Download the Example Project
+
+The whole example project with the complete source code can be downloaded xref:attachment$tutorial-example.zip[here].
+Download the ZIP file and extract it to a directory of your choice.
+Build the project with Gradle by running the following command in the project directory:
+
+[source,console]
+....
+$ ./gradle clean build
+....

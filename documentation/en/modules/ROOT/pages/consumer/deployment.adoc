@@ -1,0 +1,3 @@
+:connectorClassName: com.example.connector.consumer.CountCharactersConnector
+:connectorInterfaceName: io.transconnect.connector.api.consumer.ConsumerConnector
+include::partial$connector-deploy.adoc[]

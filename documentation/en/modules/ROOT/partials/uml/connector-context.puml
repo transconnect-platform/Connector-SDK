@@ -1,0 +1,62 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam linetype ortho
+skinparam ArrowColor #486090
+skinparam BackgroundColor white
+
+' Improved color scheme for better visual distinction
+skinparam component {
+  BorderColor #5B6A8D
+  BackgroundColor white
+}
+
+package "External Systems" as ExtSys {
+  [External Data Source] as DataSource #E8F0FF
+  [External Data Consumer] as DataConsumer #E8F0FF
+}
+
+package "TransConnect Platform" as TC {
+  [Core Processing Engine] as Core #D8E9D6
+}
+
+package "Connector SDK" as SDK {
+  package "Producer Side" as PS {
+    [Producer Connector] as PC #F0E8FF
+    [Producer Connection] as PCon #F0E8FF
+  }
+
+  package "Consumer Side" as CS {
+    [Consumer Connector] as CC #FFE8E8
+    [Consumer Connection] as CCon #FFE8E8
+  }
+
+  package "Message API" as MA {
+    [Message] as Msg #FFFFD0
+    [WritableMessage] as WMsg #FFFFD0
+  }
+}
+
+' Data flow with clearer labeling
+DataSource -right-> PC : "1. External data events"
+PC -down-> PCon : "2. Creates"
+PCon -right-> Core : "3. Sends messages"
+Core -down-> CC : "4. Sends requests"
+CC -down-> CCon : "5. Creates"
+CCon -left-> DataConsumer : "6. Interacts with"
+
+Msg <-- CCon : "Reads"
+WMsg <-- CCon : "Writes"
+Msg <-- PCon : "Creates"
+
+legend right
+  <b>Color Legend</b>
+  <color #E8F0FF>■</color> External Systems
+  <color #D8E9D6>■</color> TransConnect Core
+  <color #F0E8FF>■</color> Producer Components
+  <color #FFE8E8>■</color> Consumer Components
+  <color #FFFFD0>■</color> Message API
+endlegend
+@enduml

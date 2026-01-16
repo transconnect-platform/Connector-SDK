@@ -1,0 +1,66 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam backgroundColor white
+skinparam ArrowColor #486090
+
+' Better visual distinction
+skinparam interface {
+  BorderColor #9C27B0
+  BackgroundColor #F3E5F5
+}
+
+skinparam class {
+  BorderColor #3F51B5
+  BackgroundColor #E8EAF6
+}
+
+interface "<<interface>>\nProducerConnector" as PC {
+  +createConnection(Context): ProducerConnection
+  +getDescription(): ProducerConnectorDescriptor
+}
+
+interface "<<interface>>\nProducerConnection" as PCon {
+  +connect(MessageFactory, ProducerConnectorListener)
+  +isConnected(): boolean
+  +close()
+}
+
+interface "<<interface>>\nProducerConnectorListener" as PCL {
+  +onMessage(Message): Future<Message>
+  +onAsyncMessage(Message)
+  +onError(Throwable)
+  +onConnect()
+  +onDisconnect()
+}
+
+class "ProducerConnectorDescriptor" as PCD {
+  +CommonConnectorDescriptor common
+  +IConnectorProperty[] properties
+  +URI producedMessageXsd
+  +URI resultMessageXsd
+}
+
+PC ..> PCon : creates
+PC ..> PCD : describes
+PCon ..> PCL : notifies
+
+note bottom of PC
+  <b>Entry Point</b>
+  Creates connections and provides
+  metadata about capabilities
+end note
+
+note bottom of PCL
+  <b>Callback Interface</b>
+  Receives messages and
+  handles connection events
+end note
+
+note right of PCD
+  Describes message formats
+  and configuration options
+end note
+@enduml

@@ -1,0 +1,27 @@
+= Troubleshooting
+
+If you have problems creating or running your connector, here are some common issues and their solutions.
+
+== My connector is not displayed in the list of available connectors
+
+* Make sure that the WAR file has been correctly placed in the `$TC_USER_HOME/connectors` directory.
+* Check the `core_http.log` file in the `$TC_USER_HOME/logs` directory for error messages.
+* Ensure that the service loader file in the `src/main/resources/META-INF/services` directory has been created correctly and contains the fully qualified name of the connector class.
+* Check if all necessary dependencies have been added in the build script (`build.gradle.kts`).
+
+== Error when compiling the connector code
+
+* Make sure you are using Java 17.
+* Check the `build.gradle.kts` file for missing or incorrect dependencies.
+* Run `./gradlew clean build` to ensure that all dependencies are downloaded correctly and the code is compiled.
+* Check the console output for specific error messages and fix them accordingly.
+
+== Problems running the connector
+* Check the `core_slf4j.log` file in the `$TC_USER_HOME/logs` directory for error messages from the connector.
+* Make sure that the connection properties are configured correctly.
+* Test the connection properties outside of TRANSCONNECT to ensure they are correct (e.g., database connection, API endpoint).
+* Add additional logging in your connector code to locate the error more precisely.
+* If your connector uses extensions, make sure that all required extensions are correctly registered and configured.
+* Put the TRANSCONNECT server into remote debug mode to debug your connector code step by step.
++
+For more information on remote debug mode, see the manual under `Development` -> `Debugging`.

@@ -1,0 +1,35 @@
+= TRANSCONNECT Developer Documentation Style Guide
+:toc:
+:icons: font
+
+== Google developer documentation style guide
+
+In general, we follow the style guide that Google uses for there documentation.
+The style guide is extensive and can be found at https://developers.google.com/style .
+
+NOTE: There is no need to read through the whole style guide.
+But please have a look into it, if you are unsure about a specific topic.
+
+Some key points or differences are listed in the following sections.
+
+== File Format
+
+We use Asciidoc as the format for our documentation.
+The Asciidoc syntax is similar to Markdown, but more powerful and flexible.
+A quick reference can be found https://asciidoctor.org/docs/asciidoc-syntax-quick-reference/[here].
+
+Files end with `.adoc` and are written in plain text.
+The encoding is *UTF-8*.
+
+== Code blocks
+
+Code blocks should be used for code snippets.
+Make sure to introduce the code block with a short description.
+Mark the correct language for syntax highlighting.
+For example, use `source,java` for Java code.
+Code lines should not be longer than 80 characters.
+Code blocks should contain no more than 20 lines.
+Use https://docs.asciidoctor.org/asciidoc/latest/verbatim/callouts/[Callouts] for annotations.
+
+IMPORTANT: Ensure that the code is correct and can be executed.
+If possible include the code from source files that are compiled and tested in the CI.

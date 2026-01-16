@@ -1,0 +1,80 @@
+<header class="header">
+  <script>
+    // Event Listener that focuses search input on Ctrl+F
+    window.addEventListener("keydown", () => {
+      if ((event.keyCode == 114) || (event.ctrlKey && event.keyCode == 70)) { 
+          event.preventDefault();
+          document.getElementById('search-input').focus();
+      }
+    })
+  </script>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item">
+        <svg class="tc-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 157" fill="#086375" height="32" aria-label="TRANSCONNECT Logo">
+            <path
+              d="M188.57 0C153.853 0 125.714 28.1185 125.714 62.7991H157.14C157.14 45.4566 171.212 31.4018 188.57 31.4018H220V0H188.57Z"
+            />
+            <path
+              d="M62.8559 0H31.4257C31.4257 17.3425 17.3582 31.4018 0 31.4018V62.7991C34.712 62.7991 62.8559 34.6851 62.8559 0Z"
+            />
+            <path
+              d="M62.8559 62.8007C97.5723 62.8007 125.712 34.6823 125.712 0.00162264H94.286C94.286 17.3442 80.2141 31.399 62.8559 31.399V62.8007Z"
+            />
+            <path
+              d="M125.713 94.2009L125.714 62.7991L94.2829 62.7991V94.2009C94.2829 128.886 122.427 157 157.143 157H188.569V125.603H157.143C139.785 125.603 125.713 111.543 125.713 94.2009Z"
+            />
+            <path
+              d="M62.8559 94.2009L62.8559 62.8007L31.4257 62.7991V94.2009C31.4257 128.886 59.5696 157 94.286 157V125.603C76.9278 125.603 62.8559 111.543 62.8559 94.2009Z"
+            />
+          </svg>
+        <div data-i18n="header.documentation">Dokumentation</div>
+      </a>
+      <button class="navbar-burger" aria-controls="topbar-nav" aria-expanded="false" aria-label="Toggle main menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="nav-and-search">
+          <div class="main-nav">
+          </div>
+          {{#if env.SITE_SEARCH_PROVIDER}}
+          <div class="navbar-item search hide-for-print">
+            <div id="search-field" class="field">
+              <input id="search-input" type="search" aria-label="Suche"  data-i18n-placeholder="header.search" placeholder="Suche" {{#if page.home}} autofocus{{/if}}>
+            </div>
+          </div>
+          {{/if}}
+        </div>
+
+        <!-- Configurable language switcher using Antora's component config -->
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a id="current-language" class="navbar-link" href="#">
+            <span style="margin-right: 5px;">🌐</span>
+            <span id="current-lang-text" data-i18n="header.language">Sprache</span>
+          </a>
+          <div id="language-dropdown" class="navbar-dropdown">
+            <!-- Will be filled by JavaScript -->
+          </div>
+        </div>
+
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#" data-i18n="header.more">Mehr</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://community.transconnect-online.de/" data-i18n="header.community">Community</a>
+            <a class="navbar-item" href="mailTo:support@transconnect-online.de" data-i18n="header.mail_support">Mail an den Support</a>
+            <a class="navbar-item" href="https://sql-ag.de/" data-i18n="header.company">SQL Projekt AG</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- Load the scripts -->
+<script src="{{uiRootPath}}/js/language-utils.js" type="text/javascript"></script>
+<script src="{{uiRootPath}}/js/i18n.js" type="text/javascript" data-translations-url="{{uiRootPath}}/config/translations.json"></script>
+<script src="{{uiRootPath}}/js/language-switcher.js" type="text/javascript"></script>

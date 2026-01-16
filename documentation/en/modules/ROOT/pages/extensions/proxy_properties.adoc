@@ -1,0 +1,30 @@
+= Proxy Properties
+
+The proxy extension can be used to add proxy configuration properties to the connector descriptor.
+It is useful for connectors that require a proxy server to access a remote service.
+User-defined configuration values can then be accessed via the connection context.
+
+== How to use the proxy extension?
+
+The following dependency must be added to the `build.gradle.kts` file of the connector module:
+
+[source,kotlin]
+....
+dependencies {
+    implementation("io.transconnect.connector.extension:proxy-properties:$version")
+}
+....
+
+Please see the latest version of the `proxy-properties` extension in the Maven repository.
+
+To register associate the extension with the connector, you need to add the Extension to the Connector Annotation of the connector class:
+
+[source,java,indent=0]
+....
+@Connector(extensions = {@Extension(ProxyExtension.class)})
+....
+
+In the `ProxyExtension` class, the proxy properties can be accessed via getters.
+
+IMPORTANT: The proxy will not be configured automatically by the connector SDK.
+This must be done by the connector implementation itself.

@@ -1,0 +1,61 @@
+@startuml
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequenceArrowThickness 2
+skinparam sequenceMessageAlign center
+skinparam backgroundColor white
+skinparam ArrowColor #486090
+
+' Better styling for sequence diagrams
+skinparam sequence {
+  LifeLineBorderColor #3F51B5
+  LifeLineBackgroundColor #E8EAF6
+  ParticipantBorderColor #3F51B5
+  ParticipantBackgroundColor #E8EAF6
+  BoxBorderColor #7986CB
+  BoxBackgroundColor #E8EAF6
+}
+
+participant "TransConnect" as TC
+participant "ConsumerConnector" as CC
+participant "ConsumerConnection" as CCon
+participant "External System" as ES
+
+box "1. Initialization Phase" #E8F0FF
+  TC -> CC: createConnection(context)
+  activate CC
+  CC --> TC: new ConsumerConnection
+  deactivate CC
+end box
+
+box "2. Connection Phase" #E0F7FA
+  TC -> CCon: connect()
+  activate CCon
+  CCon -> ES: establish connection
+  CCon --> TC: connection established
+  deactivate CCon
+end box
+
+box "3. Processing Phase" #E8F5E9
+  TC -> CCon: execute(interactionId, input, output)
+  activate CCon
+  CCon -> ES: process request
+  ES --> CCon: return result
+  CCon --> TC: execution complete
+  deactivate CCon
+end box
+
+box "4. Termination Phase" #FFF8E1
+  TC -> CCon: close()
+  activate CCon
+  CCon -> ES: terminate connection
+  CCon --> TC: connection closed
+  deactivate CCon
+end box
+
+note right of ES
+  External systems respond to
+  requests from consumer connections
+end note
+@enduml

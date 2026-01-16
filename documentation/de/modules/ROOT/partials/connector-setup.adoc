@@ -1,0 +1,174 @@
+= Umgebung einrichten
+// expects the following attributes are set before including it
+// :connectorName: --> simple class name of the connector
+// :packageFragment: --> last package fragments of the connector package
+
+
+Um Connectoren zu entwickeln, müssen Sie Ihre Entwicklungsumgebung einrichten.
+Dies umfasst die Installation der notwendigen Tools und Bibliotheken.
+
+Die folgenden Voraussetzungen sind erforderlich:
+
+* Java Development Kit (JDK) 17, zum Beispiel https://openjdk.org/[OpenJDK 17]
+* https://gradle.org/[Gradle 8.8] oder höher
+
+Zusätzlich wird empfohlen, eine Integrierte Entwicklungsumgebung (IDE) wie https://www.jetbrains.com/idea/[IntelliJ IDEA], https://code.visualstudio.com/[Visual Studio Code] oder https://www.eclipse.org/[Eclipse] zu verwenden.
+
+Sobald alles installiert und eingerichtet ist, können wir mit der Erstellung des Connector-Projekts beginnen.
+
+== Connector Gradle Projekt
+
+Um ein neues Connector-Projekt zu erstellen, erstellen wir ein Gradle-Projekt.
+Gradle ist ein Build-Automatisierungstool, das verwendet wird, um den Connector zu kompilieren, zu testen und zu paketieren.
+Erstellen Sie ein neues Verzeichnis für das Projekt und navigieren Sie hinein, zum Beispiel mit bash.
+
+[source,console,subs="attributes+"]
+....
+$ mkdir {connectorName}
+$ cd {connectorName}
+....
+
+== Projektstruktur generieren
+
+Jetzt können wir ein neues Gradle-Projekt mit dem folgenden Befehl erstellen:
+
+[source,console,subs="attributes+"]
+....
+$ gradle init \
+  --java-version 17 \
+  --dsl kotlin \
+  --project-name {connectorName} \
+  --package com.example.connector.{packageFragment} \
+  --test-framework junit \
+  --no-split-project \
+  --use-defaults \
+  --type java-library
+....
+
+Dieser Befehl erstellt ein neues Gradle-Projekt mit den folgenden Einstellungen:
+
+* verwendet Java 17 zum Kompilieren des Codes
+* das Gradle-Skript ist in Kotlin geschrieben
+* der Name des Projekts ist `{connectorName}`
+* es erstellt eine Paketstruktur mit dem Namen `com.example.connector.{packageFragment}`
+* das Test-Framework ist JUnit
+* das Projekt wird nicht in mehrere Unterprojekte aufgeteilt
+* es verwendet Standardeinstellungen für das Projekt
+* Es erstellt ein java-library-Projekt, aber wir werden dies später zu einem Java Web Archive (war)-Projekt ändern
+
+Das Verzeichnis, das zur Erstellung des Projekts verwendet wurde, enthält nun die folgenden Dateien und Ordner:
+
+.Dateibaum nach der Gradle-Projekterstellung
+[source,subs="attributes+"]
+....
+│   .gitattributes
+│   .gitignore
+│   gradlew <1>
+│   gradlew.bat <1>
+│   settings.gradle.kts <2>
+│
+├───gradle <3>
+│   │   libs.versions.toml
+│   │
+│   └───wrapper
+│           gradle-wrapper.jar
+│           gradle-wrapper.properties
+│
+└───lib
+    │   build.gradle.kts <4>
+    │
+    └───src
+        ├───main
+        │   ├───java
+        │   │   └───com
+        │   │       └───example
+        │   │           └───connector
+        │   │               └───{packageFragment}
+        │   │                       Library.java <5>
+        │   │
+        │   └───resources
+        └───test
+            ├───java
+            │   └───com
+            │       └───example
+            │           └───connector
+            │               └───{packageFragment}
+            │                       LibraryTest.java <5>
+            │
+            └───resources
+....
+
+<1> Diese Dateien sind Gradle-Wrapper-Skripte, die verwendet werden können, um das Projekt zu erstellen, ohne Gradle installiert zu haben.
+<2> Die Einstellungsdatei für das Gradle-Projekt.
+Sie wird verwendet, um den Projektnamen zu konfigurieren.
+<3> Der Gradle-Wrapper und die Konfigurationsdateien.
+Dieser Ordner wird von Gradle verwendet, um seine Konfigurationsdateien zu speichern.
+<4> Die Build-Datei für die Bibliothek.
+Sie enthält die Abhängigkeiten und die Build-Konfiguration.
+<5> Einige Beispieldateien, die vom Gradle init-Befehl erstellt wurden.
+Sie können gelöscht werden.
+
+Für weitere Informationen über Gradle und die Projektstruktur siehe die https://docs.gradle.org/current/userguide/userguide.html[Gradle-Dokumentation].
+
+== Build-Datei anpassen
+
+Jetzt müssen wir die `build.gradle.kts`-Datei anpassen, um ein Java Web Archive (war)-Projekt zu erstellen.
+Öffnen Sie die Datei in Ihrer bevorzugten IDE oder Ihrem Editor und ändern Sie die folgenden Zeilen:
+
+. *Projekttyp zu einem Java Web Archive (war)-Projekt ändern*
++
+Dafür entfernen wir das `java-library`-Plugin und fügen das `war`-Plugin hinzu.
++
+[source,kotlin]
+....
+plugins {
+    war
+}
+....
+. *Maven Central Repository hinzufügen*
++
+Um die TRANSCONNECT-Bibliotheken zu verwenden, müssen wir sicherstellen, dass Maven Central in der Build-Datei konfiguriert ist.
++
+[source,kotlin]
+....
+repositories {
+    mavenCentral()
+}
+....
++
+. *Beispiel-Abhängigkeiten entfernen*
++
+Fügen Sie die Connector SDK-Abhängigkeit hinzu und entfernen Sie die Beispiel-Abhängigkeiten aus der Build-Datei.
+Behalten Sie nur die JUnit-Abhängigkeit.
++
+[source,kotlin]
+....
+dependencies {
+    providedCompile("io.transconnect.connector:api:${connectorSdkVersion}")
+
+    providedCompile("org.slf4j:slf4j-api:1.7.36")
+}
+....
++
+Die Connector SDK API ist notwendig, um den Connector zu implementieren.
+Sie können die neueste Version auf https://central.sonatype.com/artifact/io.transconnect.connector/api[Maven Central] finden.
+
+== Projekt erstellen
+
+Jetzt können wir das Projekt mit dem folgenden Befehl erstellen:
+
+.Projekt mit Gradle erstellen und testen
+[source,console]
+....
+$ gradle clean build
+....
+
+Dieser Befehl kompiliert den Code, führt die Tests aus und erstellt eine war-Datei im `build/libs`-Verzeichnis.
+
+== Zusammenfassung
+
+* In diesem Abschnitt der Anleitung haben wir die Entwicklungsumgebung für ein neues Connector-Projekt eingerichtet.
+* Wir haben ein neues Gradle-Projekt erstellt und die Build-Datei angepasst, um ein Java Web Archive (war)-Projekt zu erstellen.
+* Wir haben gelernt, wie man das Projekt erstellt und Tests ausführt.
+
+Im nächsten Abschnitt werden wir die Connection implementieren.

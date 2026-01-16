@@ -1,0 +1,57 @@
+= Erstellen eines Consumer Connectors
+
+Diese Anleitung erklärt, wie man mit dem Connector SDK einen Consumer Connector erstellt.
+Wir werden einen einfachen Connector erstellen, der Zeichen in XML-Nachrichten zählt.
+
+== Der Character Counter Consumer Connector
+
+Der Character Counter Consumer Connector ist ein einfacher Connector, der eingehende XML-Nachrichten verarbeitet und die Zeichen im Textinhalt zählt.
+Er besitzt nur eine einzige Konfigurationsoption: ob zusätzlich zu Buchstaben auch Leerzeichen (Whitespace) gezählt werden sollen.
+
+.Die Konfiguration des Character Counter Consumer Connectors
+[cols="2,3,2,1",options="header"]
+|===
+| Konfigurationsschlüssel
+| Beschreibung
+| Standardwert
+| Erforderlich
+
+| countWhitespaces
+| Legt fest, ob Leerzeichen (Whitespace-Zeichen) in die Zählung einbezogen werden sollen.
+| false
+| Nein
+|===
+
+Wenn der Connector eine Nachricht empfängt, extrahiert er den Textinhalt aus dem ROOT-Element des XML-Dokuments, zählt die Zeichen entsprechend der Konfiguration und gibt eine Antwort mit der Anzahl zurück.
+
+.Ein Beispiel für eine Eingabenachricht für den Character Counter Consumer Connector
+[source,xml]
+....
+<ROOT>Hello World! This is a test message.</ROOT>
+....
+
+.Die entsprechende Ausgabenachricht
+[source,xml]
+....
+<ROOT>
+    <COUNT>31</COUNT>
+</ROOT>
+....
+
+Wenn die Konfigurationsoption `countWhitespaces` auf `false` gesetzt ist, werden nur Buchstaben gezählt (23 in diesem Beispiel). Ist sie auf `true` gesetzt, werden alle Zeichen einschließlich Leerzeichen und Satzzeichen gezählt (31 in diesem Beispiel).
+
+Der Connector definiert eine einzige Interaktion, `countCharacters`, die die Zeichenanzahl durchführt.
+
+.Die Interaktionen des Character Counter Consumer Connectors
+[cols="2,3",options="header"]
+|===
+| Interaktions-ID
+| Beschreibung
+
+| countCharacters
+| Zählt die Zeichen im Textinhalt der Eingabenachricht
+|===
+
+Nachdem wir nun ein grundlegendes Verständnis des Connectors haben, beginnen wir mit der Projekterstellung.
+
+include::partial$download-sample.adoc[]

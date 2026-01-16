@@ -1,0 +1,115 @@
+= Definition eines Consumer Connectors
+
+Das link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html[`IConnector`,window=_blank] ist der Hauptbestandteil des SDK.
+Es ist verantwortlich für die Herstellung der Verbindung zum externen System.
+Außerdem ist es die Klasse, die die vom Benutzer einstellbaren Konfigurationseigenschaften sowie die ausführbaren Interaktionen definiert.
+
+== Erstellen der Connector-Klasse
+
+Die Connector-Klasse kann neben der Connection-Klasse aus dem vorherigen Abschnitt erstellt werden.
+Wir nennen sie `CountCharactersConnector` und sie implementiert das Interface link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnector.html[`ConsumerConnector`,window=_blank].
+
+[source,java,indent=0]
+....
+@Conntector
+public final class CountCharactersConnector implements ConsumerConnector {
+    // methods to implement
+}
+....
+
+Die Annotation link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/extension/Connector.html[`@Connector`,window=_blank] wird verwendet, um die Klasse als Connector-Implementierung zu kennzeichnen.
+Später kann sie verwendet werden, um xref:extensions/introduction.adoc[Erweiterungen (extensions)] zu deklarieren, die vom Connector genutzt werden.
+
+== Erstellen des Connector-Descriptors
+
+Um einen Connector in TRANSCONNECT zu verwenden, muss er selbsterklärend sein.
+Er muss Informationen über sich selbst bereitstellen.
+
+Zum Beispiel:
+
+* den Namen des Connectors
+* die Version
+* die Konfigurationseigenschaften
+* die verfügbaren Interaktionen
+
+Diese Daten werden von der Klasse link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnectorDescriptor.html[`ConsumerConnectorDescriptor`,window=_blank] bereitgestellt.
+Die Methode link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnector.html#getDescription()[`getDescription`,window=_blank] des Connectors gibt eine Instanz dieser Klasse zurück.
+Wir können das Builder-Pattern verwenden, um die Instanz zu erstellen.
+
+Der erste Teil enthält Metadaten über den Connector.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=description]
+....
+
+NOTE: Alle Texte, die dem Benutzer angezeigt werden, sind vom Typ link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/LocalizedText.html[`LocalizedText`,window=_blank].
+Dies ermöglicht die Lokalisierung der Texte in verschiedenen Sprachen.
+
+Der zweite Teil enthält die Konfigurationseigenschaften.
+Er legt die Eigenschaften fest, die vom Benutzer eingestellt werden können.
+
+In unserem Beispiel definieren wir eine einzelne Konfigurationseigenschaft mit der ID `countWhitespaces`.
+Sie wird verwendet, um zu steuern, ob Leerzeichen-Zeichen in die Zählung einbezogen werden sollen.
+Deshalb ist die Eigenschaft vom Typ `BOOLEAN` und hat den Standardwert `false`.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=property]
+....
+
+NOTE: Im xref:reference/configuration.adoc[Referenz-Abschnitt] finden Sie weitere Informationen zu den Konfigurationseigenschaften.
+
+Der dritte Teil definiert die Interaktionen, die der Connector bereitstellt.
+Dies ist ein wesentlicher Unterschied zu Producer Connectors – Consumer Connectors müssen definieren, welche Interaktionen sie unterstützen.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=interaction]
+....
+
+NOTE: Jede Interaktion benötigt Eingabe- und Ausgabe-Nachrichtenschemas, um das erwartete Nachrichtenformat zu definieren.
+
+Im vierten Teil fügen wir alles zu einem vollständigen Connector-Descriptor zusammen:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=complete]
+....
+
+NOTE: Der Descriptor kann sehr umfangreich und unübersichtlich werden, wenn es viele Konfigurationseigenschaften oder Interaktionen gibt.
+In diesem Fall wird empfohlen, den Descriptor in einer YAML-Datei zu definieren.
+Weitere Informationen finden Sie im xref:extensions/yaml_descriptor.adoc[Erweiterungs-Abschnitt].
+
+== Instanziieren einer Connection
+
+Ein weiterer wichtiger Bestandteil des Connectors ist die Methode `createConnection`.
+Sie ist verantwortlich für die Erstellung der Verbindung, die eingehende Anfragen verarbeitet.
+Die Implementierung ist einfach – wir erstellen einfach eine neue Instanz unserer `CountCharactersConnection`-Klasse und übergeben den Kontext:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=createConnection]
+....
+
+== Unterschiede zwischen Consumer und Producer Connectors
+
+Es gibt einige wesentliche Unterschiede zwischen Consumer und Producer Connectors:
+
+1. **Interaktionen (Interactions)**: Consumer Connectors definieren Interaktionen, die ausgeführt werden können und sowohl das Eingabe- als auch das Ausgabe-Nachrichtenformat spezifizieren.
+Producer Connectors geben in der Regel nur das Ausgabe-Nachrichtenformat an.
+
+2. **Ablauf der Ausführung (Execution Flow)**: Consumer Connectors empfangen Nachrichten und erzeugen Antworten, während Producer Connectors proaktiv Nachrichten generieren.
+
+3. **Verbindungsmanagement (Connection Management)**: Consumer Connections konzentrieren sich darauf, eingehende Anfragen effizient zu verarbeiten, während Producer Connections den Lebenszyklus der ausgehenden Nachrichtenerzeugung verwalten müssen.
+
+== Zusammenfassung
+
+In diesem Abschnitt haben wir Folgendes gelernt:
+
+* Wie man eine Consumer Connector-Klasse erstellt
+* Wie man einen Connector-Descriptor mit Interaktionen erstellt
+* Wie man Konfigurationseigenschaften für den Connector definiert
+* Wie man eine Consumer Connection instanziiert
+
+Im nächsten Abschnitt betrachten wir die Bereitstellung (Deployment) des Consumer Connectors.

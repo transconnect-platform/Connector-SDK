@@ -1,0 +1,115 @@
+= Defining a Consumer Connector
+
+The link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html[`IConnector`,window=_blank] is the main part of the SDK.
+It is responsible for creating the connection to the external system.
+Also, it is the class that defines the configuration properties that can be set by the user and the interactions that can be executed.
+
+== Create the Connector-Class
+
+The Connector-Class can be created next to the Connection-Class from the previous section.
+We name it `CountCharactersConnector` and it implements the link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnector.html[`ConsumerConnector`,window=_blank] interface.
+
+[source,java,indent=0]
+....
+@Conntector
+public final class CountCharactersConnector implements ConsumerConnector {
+    // methods to implement
+}
+....
+
+The link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/extension/Connector.html[`@Connector`,window=_blank] annotation is used to mark the class as a Connector implementation.
+Later it can be used to declare xref:extensions/introduction.adoc[extensions] that will be used by the Connector.
+
+== Create the Connector Descriptor
+
+To use a Connector in the TRANSCONNECT it needs to be self describing.
+It has to provide information about itself.
+
+For example:
+
+* the name of the connector
+* the version
+* the configuration properties
+* the available interactions
+
+These data are provided by the link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnectorDescriptor.html[`ConsumerConnectorDescriptor`,window=_blank] class.
+The link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnector.html#getDescription()[`getDescription`,window=_blank] method of the Connector returns an instance of this class.
+We can use the Builder-Pattern to create the instance.
+
+The first part contains metadata about the connector.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=description]
+....
+
+NOTE: All texts that will be presented to the user are from the type link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/LocalizedText.html[`LocalizedText`,window=_blank].
+This allows localization of the texts in different languages.
+
+The second part contains the configuration properties.
+It specifies the properties that can be set by the user.
+
+In our example, we specify a single configuration property with ID `countWhitespaces`.
+It is used to control whether whitespace characters should be included in the count.
+Therefore, the property is of type `BOOLEAN` and has a default value of `false`.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=property]
+....
+
+NOTE: In the xref:reference/configuration.adoc[Reference section] you can find more information about the configuration properties.
+
+The third part defines the interactions that the connector provides.
+This is a key difference from producer connectors - consumer connectors need to define what interactions they support.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=interaction]
+....
+
+NOTE: Each interaction needs input and output message schemas to define the expected format of the messages.
+
+In the fourth part, we build everything together into the complete connector descriptor:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=complete]
+....
+
+NOTE: The descriptor can get large and confusing when there are many configuration properties or interactions.
+In this case, it is recommended to define the descriptor in a YAML file.
+See the xref:extensions/yaml_descriptor.adoc[Extension section] for more information.
+
+== Instantiate a Connection
+
+Another important part of the Connector is the link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnector.html#createConnection(io.transconnect.connector.api.Context)[`createConnection`,window=_blank] method.
+It is responsible for creating the connection that will process incoming requests.
+The implementation is straightforward - we simply create a new instance of our `CountCharactersConnection` class and pass the context:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=createConnection]
+....
+
+== Differences between Consumer and Producer Connectors
+
+There are some key differences between Consumer and Producer Connectors:
+
+1. **Interactions**: Consumer Connectors define interactions that can be executed, which specify both input and output message formats.
+Producer Connectors typically only specify the output message format.
+
+2. **Execution Flow**: Consumer Connectors receive messages and produce responses, while Producer Connectors generate messages proactively.
+
+3. **Connection Management**: Consumer Connections focus on processing incoming requests efficiently, while Producer Connections need to manage the lifecycle of outgoing message generation.
+
+== Summary
+
+In this section we learned the following things:
+
+* How to create a Consumer Connector-Class
+* How to create a Connector Descriptor with interactions
+* How to define configuration properties for the connector
+* How to instantiate a Consumer Connection
+
+In the next section we will look at the deployment of the Consumer Connector.

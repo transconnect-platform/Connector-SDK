@@ -1,0 +1,181 @@
+= Configuration Reference
+
+== Overview
+
+TRANSCONNECT connectors use a standardized configuration model that defines their identity, capabilities, and configuration options.
+This document outlines the key components and properties used when configuring connectors.
+
+[TIP]
+====
+Understanding the connector configuration model is essential for both connector developers and integration specialists.
+====
+
+== Core Components
+
+=== Connector Types
+
+TRANSCONNECT supports two primary connector types:
+
+Consumer Connectors::
+Receive and process incoming messages through defined interactions.
+
+Producer Connectors::
+Generate messages according to schema definitions and process result messages.
+
+.Complete Connector Class Diagram
+[plantuml#class-diagram,format=svg]
+....
+include::partial$uml/config-class-diagram.puml[]
+....
+
+.Simplified Connector Configuration Diagram
+[plantuml#config-diagram,format=svg]
+....
+include::partial$uml/connector-configuration-diagram.puml[]
+....
+
+== Configuration Elements
+
+=== Connector Identity
+
+[#connector-identity]
+Defines the core identity and metadata of a connector.
+
+[cols="2,5,1",options="header"]
+|====
+|Property |Description |Required
+|specVersion |Version of the specification format (e.g., 1.0.0) |Yes
+|type |Unique URN identifier (e.g., "urn:TRANSCONNECT:connector:sample-consumer") |Yes
+|version |Connector implementation version |Yes
+|vendor |Provider organization name |Yes
+|displayName |UI display names with language variants |Yes
+|description |Purpose descriptions with language variants |Yes
+|labels |Categorization tags (e.g., ["sample", "greeting"]) |No
+|====
+
+[#properties]
+=== Properties Configuration
+
+==== Property Definitions
+
+All connector properties share these common attributes:
+
+[cols="2,5,1",options="header"]
+|====
+|Attribute |Description |Required
+|id |Unique property identifier |Yes
+|displayName |UI display names with language variants |Yes
+|description |Purpose descriptions with language variants |Yes
+|type |Data type (TEXT, SECRET, INTEGER, FLOAT, BOOLEAN, SELECT) |Yes
+|defaultValue |Default value when none is provided |No
+|required |Whether user input is mandatory |Yes
+|validator |Input validation rules |No
+|dependsOn |Property dependencies and constraints |No
+|entries |For SELECT type - available options |Yes (for SELECT)
+|====
+
+==== Property Types
+
+Each property must use one of the following data types:
+
+[cols="1,2,4",options="header"]
+|====
+|Type |Java Class |Usage
+|TEXT |String |General text input
+|SECRET |String |Sensitive data (passwords, tokens, etc.)
+|INTEGER |Integer |Whole numbers
+|FLOAT |Double |Decimal numbers
+|BOOLEAN |Boolean |True/false values
+|SELECT |String |Selection from predefined options
+|====
+
+==== Localized Text Format
+
+The localization system uses locale-specific messages:
+
+[cols="2,5",options="header"]
+|====
+|Attribute |Purpose
+|locale |Language code (e.g., "en", "de")
+|message |Translated text
+|====
+
+== Implementation Examples
+
+This section demonstrates how to implement connectors using the TRANSCONNECT API.
+
+=== Implementing a Producer Connector
+
+==== DateTime Producer Connector
+
+The DateTime Producer creates messages with timestamps at configurable intervals.
+
+[#producer-description]
+.Producer Connector Descriptor
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnector.java[tags=description]
+....
+
+[TIP]
+The Builder pattern makes it easy to create descriptors with fluent API calls.
+
+The connector properties define user-configurable settings:
+
+[#producer-property]
+.Producer Property Definition
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnector.java[tags=property]
+....
+
+The complete connector setup ties everything together:
+
+[#producer-complete]
+.Complete Producer Configuration
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnector.java[tags=description]
+....
+
+=== Implementing a Consumer Connector
+
+==== Character Counter Connector
+
+This consumer connector counts characters in incoming messages.
+
+[#consumer-description]
+.Consumer Connector Descriptor
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=description]
+....
+
+Consumer connectors also define interactions that represent the operations they can perform:
+
+[#consumer-interaction]
+.Consumer Interaction Definition
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=interaction]
+....
+
+The complete consumer connector ties everything together:
+
+[#consumer-complete]
+.Complete Consumer Configuration
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnector.java[tags=complete]
+....
+
+=== Using Configuration in Connections
+
+When implementing connections, you can access the configuration properties like this:
+
+[#connection-usage]
+.Using Configuration in a Connection
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnection.java[tags=constructor]
+....

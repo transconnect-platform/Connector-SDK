@@ -1,0 +1,21 @@
+# This is part of a distributed component version. It therefore has only a reduced set of properties.
+# The rest of the properties is defined in the frontend repository.
+# See https://docs.antora.org/antora/latest/distributed-component-version/ for more information
+name: dev-doc
+version: 4.X.X
+start_page: introduction.adoc
+nav:
+  - modules/ROOT/connector-sdk-nav.adoc
+  - modules/ROOT/nav.adoc
+asciidoc:
+  attributes:
+    # its necessary to undo the user-doc-root config:
+    # tip-caption: "Example"
+    tip-caption: "Tip"
+ext:
+  collector:
+    scan:
+      - dir: documentation/tutorial-example
+        into: modules/ROOT/examples/tutorial-example
+      - dir: documentation/tutorial-example
+        into: modules/ROOT/attachments/tutorial-example

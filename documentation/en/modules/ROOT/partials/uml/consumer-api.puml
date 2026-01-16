@@ -1,0 +1,67 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam backgroundColor white
+skinparam ArrowColor #486090
+
+' Better visual distinction for interfaces
+skinparam interface {
+  BorderColor #9C27B0
+  BackgroundColor #F3E5F5
+}
+
+skinparam class {
+  BorderColor #3F51B5
+  BackgroundColor #E8EAF6
+}
+
+interface "<<interface>>\nConsumerConnector" as CC {
+  +createConnection(Context): ConsumerConnection
+  +getDescription(): ConsumerConnectorDescriptor
+}
+
+interface "<<interface>>\nConsumerConnection" as CCon {
+  +connect()
+  +isConnected(): boolean
+  +execute(URI, Message, WritableMessage)
+  +close()
+}
+
+class "ConsumerConnectorDescriptor" as CCD {
+  +CommonConnectorDescriptor common
+  +IConnectorProperty[] properties
+  +Interaction[] interactions
+}
+
+class "Interaction" as I {
+  +URI id
+  +LocalizedText[] displayName
+  +LocalizedText[] description
+  +URI inMessageXsd
+  +URI outMessageXsd
+}
+
+CC ..> CCon : creates
+CC ..> CCD : describes
+CCD o-right- I : defines operations
+
+note bottom of CC
+  <b>Entry Point</b>
+  Creates connections and provides
+  metadata about capabilities
+end note
+
+note bottom of CCon
+  <b>Handles Requests</b>
+  Processes incoming messages and
+  generates responses
+end note
+
+note right of I
+  Defines available 
+  operations and their
+  input/output formats
+end note
+@enduml

@@ -1,0 +1,162 @@
+= Aufbau einer Consumer-Verbindung
+
+Eine Connector-Implementierung besteht aus zwei Teilen: der Connection und dem Connector selbst.
+Die Connection-Klasse enthält die Geschäftslogik, zum Beispiel stellt sie eine Verbindung zu einer Datenbank her oder verarbeitet eingehende Anfragen.
+Je nachdem, ob ein Producer- oder Consumer-Connector implementiert wird, verarbeitet die Connection unterschiedliche Workflows.
+
+In unserem Beispiel implementieren wir eine einfache Connection, die Zeichen in einer XML-Nachricht zählt.
+Die Connection wird von der Connector-Klasse erstellt.
+Die Connector-Klasse sehen wir uns im nächsten Abschnitt an.
+
+Weitere Details zu den Klassenabhängigkeiten im Connector SDK finden Sie unter xref:architecture.adoc[Connector SDK Architektur].
+
+== Erstellen der Connection-Klasse
+
+Lassen Sie uns eine neue Java-Klasse erstellen und das link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html[`ConsumerConnection`,window=_blank]-Interface implementieren.
+
+. Erstellen Sie ein neues Package im Verzeichnis `src/main/java`.
++
+Der Paketname sollte `com.example.connector.consumer` lauten.
+. Nun erstellen wir eine neue Java-Klasse im Package mit dem Namen `CountCharactersConnection`.
+. Als Nächstes fügen wir der Klasse das Interface link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/consumer/ConsumerConnection.html[`ConsumerConnection`,window=_blank] hinzu.
++
+Das ConsumerConnection-Interface ist Teil des Connector SDK und stellt die notwendigen Methoden zur Verfügung, um eine Connection zu erstellen.
++
+Dazu ändern Sie die Klassendefinition wie folgt:
++
+[source,java,indent=0]
+....
+public final class CountCharactersConnection implements ConsumerConnection {
+    // methods to implement
+}
+....
+
+== Implementierung der Connection-Methoden
+
+Das ConsumerConnection-Interface erzwingt die Implementierung mehrerer Methoden.
+Zusätzlich muss die Connection in der Lage sein, ein link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Context.html[`Context`,window=_blank]-Objekt übergeben zu bekommen.
+Dieses enthält die Konfiguration, die zum Aufbau der Connection verwendet werden soll.
+
+Beispielhafte Konfigurationseigenschaften sind:
+
+* Host und Port eines externen Systems
+* Verbindungs-Timeout
+* Verarbeitungsoptionen wie z.B. ob Leerzeichen mitgezählt werden sollen
+
+Der bequemste Weg, den Context an die Connection zu übergeben, ist über den Konstruktor.
+
+=== Konstruktor
+
+Wir implementieren einen Konstruktor, der die Konfiguration übergeben bekommt und in einem Feld speichert.
+Außerdem initialisieren wir eine XMLOutputFactory, die verwendet wird, um XML-Antworten zu erzeugen.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=constructor]
+....
+
+=== Connect
+
+Nun können wir die Methode `connect` implementieren.
+Sie wird verwendet, um die Verbindung zu einem externen System herzustellen, falls erforderlich.
+In unserem einfachen Beispiel muss keine echte Verbindung aufgebaut werden, daher bleibt die Methode leer.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=connect]
+....
+
+=== Execute
+
+Die Methode `execute` ist das Herzstück einer ConsumerConnection. Sie verarbeitet eine eingehende Nachricht basierend auf der angeforderten Interaktion und erzeugt eine Antwort.
+
+In unserem Beispiel prüfen wir, ob es sich bei der Interaktion um unsere unterstützte "countCharacters"-Interaktion handelt. Falls ja, holen wir den Konfigurationsparameter "countWhitespaces", um zu bestimmen, ob Leerzeichen bei der Zeichenzählung berücksichtigt werden sollen, und führen dann die Zähllogik aus.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=execute]
+....
+
+In der Methode `executeCountCharacters` extrahieren wir den Text aus der eingehenden XML-Nachricht und zählen die Zeichen entsprechend der Konfiguration.
+Anschließend wird die Antwortnachricht erstellt und in den Body der `response`-Nachricht geschrieben.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=executeCountCharacters]
+....
+
+IMPORTANT: Stellen Sie sicher, dass der `OutputStream` nach dem Schreiben der Antwortnachricht geschlossen wird.
+
+Wir verwenden einen `XmlEventReader`, um den Text zwischen den "ROOT"-Tags in der eingehenden XML-Nachricht zu extrahieren.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=extractTextFromXml]
+....
+
+NOTE: Es gibt auch andere Möglichkeiten, XML zu verarbeiten, wie zum Beispiel mit xref:extensions/jaxb.adoc[JAXB]. In diesem Beispiel haben wir uns für eine einfache, direkte XML-Event-Verarbeitung entschieden.
+
+Um die Zeichen innerhalb des Textes zu zählen, verwenden wir die Methode `countCharacters`.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=countCharacters]
+....
+
+Sollte es während der Verarbeitung zu einem unbehandelten Fehler kommen, wird TRANSCONNECT die Verarbeitung der Nachricht abbrechen und den Fehler protokollieren.
+Die Verarbeitung wird nicht wiederholt.
+
+=== Verbindungsprüfung
+
+Die Methode `isConnected` wird verwendet, um zu prüfen, ob die Verbindung noch besteht.
+In unserem Beispiel, da keine echte externe Verbindung besteht, gibt diese Methode immer true zurück.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=isConnected]
+....
+
+Diese Methode wird von TRANSCONNECT aufgerufen, um zu prüfen, ob die Verbindung noch aktiv ist oder ob eine neue Verbindung erstellt werden muss.
+
+Die Verbindungsprüfung erfolgt vor jedem Aufruf von `execute`.
+
+=== Verbindung schließen
+
+Die Methode `close` wird verwendet, um die Verbindung zu schließen und Ressourcen freizugeben.
+In unserem Beispiel gibt es keine Ressourcen, die freigegeben werden müssen.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/CountCharactersConnection.java[tags=close]
+....
+
+Diese Methode wird von TRANSCONNECT aufgerufen, um die Verbindung zu schließen.
+Es ist eine gute Praxis, die Methode defensiv zu schreiben, sodass sie keine Ausnahmen verursachen kann.
+
+TRANSCONNECT ruft die `close`-Methode unter anderem in folgenden Situationen auf:
+
+* Beim Herunterfahren von TRANSCONNECT
+* Wenn die Connection als inaktiv erkannt wird
+* Wenn der Connector nicht mehr verwendet wird
+* Wenn die Verbindungseigenschaften geändert wurden und die Connection neu aufgebaut werden muss
+* Wenn ein unbehandelter Fehler in der Connection aufgetreten ist
+
+== Vergleich mit Producer Connection
+
+Im Gegensatz zu einer ProducerConnection, die aktiv Nachrichten erzeugt, ist eine ConsumerConnection passiv und reagiert auf eingehende Anfragen. Die wichtigsten Unterschiede sind:
+
+1. ProducerConnection verwendet eine `connect`-Methode, die einen Listener erhält, um Nachrichten zurückzumelden, während die `connect`-Methode der ConsumerConnection keine Argumente erhält.
+
+2. ConsumerConnection verfügt über eine `execute`-Methode zur Verarbeitung eingehender Nachrichten, die bei ProducerConnection nicht existiert.
+
+3. ProducerConnection ist für das Erstellen und Senden von Nachrichten verantwortlich, während ConsumerConnection für die Verarbeitung eingehender Nachrichten und das Erstellen von Antworten zuständig ist.
+
+== Zusammenfassung
+
+In diesem Abschnitt haben wir gelernt, wie man eine Connection für einen Consumer-Connector erstellt.
+
+* Wir haben eine einfache Connection implementiert, die Zeichen in XML-Nachrichten zählt.
+* Wir wissen, wie die Konfiguration an die Connection übergeben wird.
+* Wir haben gesehen, wie die Methode `execute` implementiert wird, um eingehende Nachrichten zu verarbeiten und Antworten zu erstellen.
+
+Im nächsten Abschnitt erstellen wir die Connector-Klasse, die die Connection erzeugt und die Konfiguration verwaltet.

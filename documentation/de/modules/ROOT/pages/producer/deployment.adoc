@@ -1,0 +1,3 @@
+:connectorClassName: com.example.connector.producer.DateTimeConnector
+:connectorInterfaceName: io.transconnect.connector.api.producer.ProducerConnector
+include::partial$connector-deploy.adoc[]

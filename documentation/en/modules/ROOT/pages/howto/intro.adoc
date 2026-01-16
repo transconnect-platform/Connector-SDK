@@ -1,0 +1,35 @@
+= How-To Guides
+
+This section provides practical guides for common tasks when developing connectors with the TRANSCONNECT SDK.
+Each guide focuses on a specific feature or technique to help you implement efficient and robust connectors.
+
+== Available Guides
+
+[cols="1,3",options="header"]
+|===
+|Guide |Description
+
+|xref:howto/message_attachments.adoc[Message Attachments]
+|Learn how to work with message attachments in your connectors, including handling binary data, files, and media content.
+
+|xref:howto/validator-config.adoc[Validator Configuration]
+|Explore TRANSCONNECT's validator system to ensure property values meet specific requirements using REGEX, RANGE, and DATETIME validators.
+|===
+
+== Getting Started
+
+Each guide provides:
+
+* Step-by-step instructions
+* Code examples
+* Best practices
+* Troubleshooting tips
+
+Choose the guide that matches your current development needs.
+If you're new to connector development, we recommend reviewing the guides in the order they're presented, as concepts may build upon each other.
+
+[TIP]
+====
+These how-to guides complement the main tutorial sections.
+For a complete understanding of connector development, first follow the xref:producer/intro.adoc[Producer Connector] or xref:consumer/intro.adoc[Consumer Connector] tutorials.
+====

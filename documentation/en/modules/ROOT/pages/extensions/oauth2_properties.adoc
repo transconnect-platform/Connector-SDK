@@ -1,0 +1,62 @@
+= OAuth2 Properties
+
+The OAuth2 properties extension adds common OAuth2 configuration properties to the connector descriptor.
+It provides standard OAuth2 properties like authentication URL, client credentials, and scopes.
+This extension is designed to work with OAuth2 token provider extensions that handle the actual authentication.
+
+== How to use the OAuth2 properties extension?
+
+The following dependency must be added to the `build.gradle.kts` file of the connector module:
+
+[source,kotlin]
+....
+dependencies {
+    implementation("io.transconnect.connector.extension:oauth2-properties:$version")
+}
+....
+
+To associate the extension with the connector, you need to add the Extension to the Connector Annotation of the connector class:
+
+[source,java,indent=0]
+....
+@Connector(extensions = {@Extension(OAuth2PropertiesExtension.class)})
+....
+
+== Configuration Properties
+
+The extension adds the following OAuth2 configuration properties:
+
+[cols="1,1,2",options="header"]
+|===
+|Property |Required |Description
+
+|`oauth2.authUrl`
+|Yes
+|OAuth2 authentication endpoint URL
+
+|`oauth2.clientId`
+|Yes
+|OAuth2 client identifier
+
+|`oauth2.clientSecret`
+|Yes
+|OAuth2 client secret (marked as secret property)
+
+|`oauth2.scope`
+|No
+|OAuth2 permission scope (default: Exchange Online scope)
+|===
+
+== Usage with Token Providers
+
+The OAuth2 properties extension is typically used together with OAuth2 token provider extensions:
+
+[source,java,indent=0]
+....
+// The OAuth2 properties are automatically available to token providers
+MicrosoftOAuth2TokenProviderExtension tokenProvider = new MicrosoftOAuth2TokenProviderExtension();
+tokenProvider.initialize(config); // Reads oauth2.* properties
+....
+
+IMPORTANT: The OAuth2 properties extension only provides configuration properties.
+The actual OAuth2 authentication must be handled by a compatible token provider extension.

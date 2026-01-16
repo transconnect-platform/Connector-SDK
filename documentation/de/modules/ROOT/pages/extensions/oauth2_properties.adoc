@@ -1,0 +1,62 @@
+= OAuth2-Eigenschaften
+
+Die OAuth2-Eigenschaften-Erweiterung fügt gängige OAuth2-Konfigurationseigenschaften zum Connector-Deskriptor hinzu.
+Sie stellt Standard-OAuth2-Eigenschaften wie Authentifizierungs-URL, Client-Anmeldedaten und Bereiche bereit.
+Diese Erweiterung ist darauf ausgelegt, mit OAuth2-Token-Provider-Erweiterungen zu funktionieren, die die eigentliche Authentifizierung durchführen.
+
+== Wie wird die OAuth2-Eigenschaften-Erweiterung verwendet?
+
+Die folgende Abhängigkeit muss zur Datei `build.gradle.kts` des Connector-Moduls hinzugefügt werden:
+
+[source,kotlin]
+....
+dependencies {
+    implementation("io.transconnect.connector.extension:oauth2-properties:$version")
+}
+....
+
+Um die Erweiterung mit dem Connector zu verknüpfen, muss die Extension zur Connector-Annotation der Connector-Klasse hinzugefügt werden:
+
+[source,java,indent=0]
+....
+@Connector(extensions = {@Extension(OAuth2PropertiesExtension.class)})
+....
+
+== Konfigurationseigenschaften
+
+Die Erweiterung fügt die folgenden OAuth2-Konfigurationseigenschaften hinzu:
+
+[cols="1,1,2",options="header"]
+|===
+|Eigenschaft |Erforderlich |Beschreibung
+
+|`oauth2.authUrl`
+|Ja
+|OAuth2-Authentifizierungs-Endpunkt-URL
+
+|`oauth2.clientId`
+|Ja
+|OAuth2-Client-Identifikator
+
+|`oauth2.clientSecret`
+|Ja
+|OAuth2-Client-Geheimnis (als geheime Eigenschaft markiert)
+
+|`oauth2.scope`
+|Nein
+|OAuth2-Berechtigungsbereich (Standard: Exchange Online-Bereich)
+|===
+
+== Verwendung mit Token-Providern
+
+Die OAuth2-Eigenschaften-Erweiterung wird typischerweise zusammen mit OAuth2-Token-Provider-Erweiterungen verwendet:
+
+[source,java,indent=0]
+....
+// Die OAuth2-Eigenschaften sind automatisch für Token-Provider verfügbar
+MicrosoftOAuth2TokenProviderExtension tokenProvider = new MicrosoftOAuth2TokenProviderExtension();
+tokenProvider.initialize(config); // Liest oauth2.*-Eigenschaften
+....
+
+IMPORTANT: Die OAuth2-Eigenschaften-Erweiterung stellt nur Konfigurationseigenschaften bereit.
+Die eigentliche OAuth2-Authentifizierung muss von einer kompatiblen Token-Provider-Erweiterung durchgeführt werden.

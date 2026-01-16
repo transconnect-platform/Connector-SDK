@@ -1,0 +1,3 @@
+:connectorName: CountCharactersConnector
+:packageFragment: consumer
+include::partial$connector-setup.adoc[]

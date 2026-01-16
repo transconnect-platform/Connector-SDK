@@ -1,0 +1,133 @@
+= Validator
+
+== Overview
+
+The TRANSCONNECT validator system provides a powerful way to ensure property values meet specific requirements. It has been simplified to use three core validator types: `REGEX`, `RANGE`, and `DATETIME`, offering a balance between flexibility and ease of use.
+
+[TIP]
+====
+Validators are defined as part of property configurations. See xref:/reference/configuration.adoc#properties[Properties Configuration] for details on how properties are structured.
+====
+
+== Core Validator Types
+[#validator-types]
+[cols="1,3,2", options="header"]
+|====
+|Validator Type |Purpose |Compatible Property Types
+|REGEX |Pattern-based string validation |TEXT, SECRET
+|RANGE |Numeric value validation |INTEGER, FLOAT
+|DATETIME |Date and time format validation |TEXT
+|====
+
+=== REGEX Validator
+The REGEX validator uses regular expressions to validate string input. It's highly flexible and can enforce patterns for various string formats.
+
+[source,yaml]
+....
+# Basic string validation
+property:
+  type: TEXT
+  validator:
+    type: REGEX
+    config:
+      pattern: "[a-zA-Z0-9]+"
+
+# Password validation
+property:
+  type: SECRET
+  validator:
+    type: REGEX
+    config:
+      pattern: "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$"
+....
+
+=== RANGE Validator
+The RANGE validator ensures numeric values fall within acceptable boundaries. It supports both simple min/max ranges and multiple disjointed ranges.
+
+[source,yaml]
+....
+# Single integer range
+property:
+  type: INTEGER
+  validator:
+    type: RANGE
+    config:
+      min: 0
+      max: 100
+
+# Multiple integer ranges
+property:
+  type: INTEGER
+  validator:
+    type: RANGE
+    config:
+      ranges:
+        1: 5    # Allows values between 1-5
+        10: 20  # Allows values between 10-20
+        50: 75  # Allows values between 50-75
+....
+
+=== DATETIME Validator
+The DATETIME validator ensures text input conforms to a specific date/time format.
+
+[source,yaml]
+....
+property:
+  type: TEXT
+  validator:
+    type: DATETIME
+    config:
+      format: "yyyy-MM-dd HH:mm:ss"
+....
+
+== Property Dependencies
+
+TRANSCONNECT supports conditional property relationships using the dependsOn feature. This allows properties to depend on the value of other properties.
+[source,yaml]
+....
+properties:
+  - id: "retryEnabled"
+    type: "BOOLEAN"
+    defaultValue: false
+    required: true
+
+  - id: "retryCount"
+    type: "INTEGER"
+    defaultValue: 3
+    required: true
+    dependsOn:
+      - property: "retryEnabled"
+        value: true
+    validator:
+      type: RANGE
+      config:
+        min: 1
+        max: 10
+....
+
+[#dependency-operations]
+.Available Dependency Operations
+[cols="1,2", options="header"]
+|====
+|Operation |Description
+|EQUALS |Property value must equal the specified value
+|NOT_EQUALS |Property value must not equal the specified value
+|GREATER_THAN |Property value must be greater than the specified value
+|GREATER_OR_EQUALS |Property value must be greater than or equal to the specified value
+|LOWER_THAN |Property value must be less than the specified value
+|LOWER_OR_EQUALS |Property value must be less than or equal to the specified value
+|====
+
+[TIP]
+====
+Dependencies can significantly improve the user experience by hiding properties until they're relevant, or making them mandatory only in certain scenarios.
+====
+
+== Error Handling
+
+The validator system provides specific error messages for:
+
+* Invalid property type and validator combinations
+* Malformed validation patterns
+* Values outside acceptable ranges
+* Invalid date/time formats

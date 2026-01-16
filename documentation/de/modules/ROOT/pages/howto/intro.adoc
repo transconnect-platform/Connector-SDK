@@ -1,0 +1,36 @@
+= How-To-Anleitungen
+
+Dieser Abschnitt bietet praxisorientierte Anleitungen für gängige Aufgaben bei der Entwicklung von Konnektoren mit dem TRANSCONNECT SDK.
+Jede Anleitung konzentriert sich auf eine bestimmte Funktion oder Technik, um Ihnen bei der Implementierung effizienter und robuster Konnektoren zu helfen.
+
+== Verfügbare Anleitungen
+
+[cols="1,3",options="header"]
+|===
+|Anleitung |Beschreibung
+
+|xref:howto/message_attachments.adoc[Nachrichtenanhänge]
+|Erfahren Sie, wie Sie mit Nachrichtenanhängen in Ihren Konnektoren arbeiten, einschließlich der Handhabung von Binärdaten, Dateien und Mediainhalten.
+
+|xref:howto/validator-config.adoc[Validator-Konfiguration]
+|Entdecken Sie das Validator-System von TRANSCONNECT, um sicherzustellen, dass Eigenschaftswerte bestimmte Anforderungen erfüllen, mithilfe von REGEX, RANGE und DATETIME Validatoren (Validator).
+
+|===
+
+== Erste Schritte
+
+Jede Anleitung bietet:
+
+* Schritt-für-Schritt-Anweisungen
+* Codebeispiele
+* Best Practices (Bewährte Vorgehensweisen)
+* Tipps zur Fehlerbehebung
+
+Wählen Sie die Anleitung aus, die zu Ihren aktuellen Entwicklungsanforderungen passt.
+Wenn Sie neu in der Konnektorentwicklung sind, empfehlen wir, die Anleitungen in der angegebenen Reihenfolge durchzugehen, da die Konzepte aufeinander aufbauen können.
+
+[TIP]
+====
+Diese How-To-Anleitungen ergänzen die Haupt-Tutorial-Abschnitte.
+Für ein vollständiges Verständnis der Konnektorentwicklung folgen Sie zunächst den xref:producer/intro.adoc[Producer Connector] oder xref:consumer/intro.adoc[Consumer Connector] Tutorials.
+====

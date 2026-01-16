@@ -1,0 +1,148 @@
+= Aufbau einer Producer-Verbindung
+
+Eine Connector-Implementierung besteht aus zwei Teilen: der Connection und dem Connector selbst.
+Die Connection-Klasse enthält die Geschäftslogik, zum Beispiel stellt sie eine Verbindung zu einer Datenbank her oder stellt eine REST-API bereit.
+Je nachdem, ob ein Producer-Connector oder ein Consumer-Connector implementiert wird.
+
+In unserem Beispiel implementieren wir eine einfache Connection, die in regelmäßigen Abständen eine Nachricht erzeugt.
+Die Connection wird von der Connector-Klasse erstellt.
+Die Connector-Klasse betrachten wir im nächsten Abschnitt.
+
+Weitere Details zu den Klassenabhängigkeiten im Connector SDK finden Sie unter xref:architecture.adoc[Connector SDK Architektur].
+
+== Erstellen der Connection-Klasse
+
+Lassen Sie uns eine neue Java-Klasse erstellen und das Connection-Interface implementieren.
+
+. Erstellen Sie ein neues Package im Verzeichnis `src/main/java`.
++
+Der Paketname sollte `com.example.connector.producer` lauten.
+. Nun erstellen wir eine neue Java-Klasse im Package mit dem Namen `DateTimeConnection`.
+. Als Nächstes fügen wir das link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Connection.html[`Connection`,window=_blank]-Interface zur Klasse hinzu.
++
+Das Connection-Interface ist Teil des Connector SDK und stellt die notwendigen Methoden zur Verfügung, um eine Connection zu erstellen.
++
+Dazu ändern Sie die Klassendefinition wie folgt:
++
+[source,java,indent=0]
+....
+public class DateTimeConnection implements ProducerConnection {
+    // methods to implement
+}
+....
+
+== Implementieren der Connection-Methoden
+
+Das Connection-Interface erzwingt die Implementierung einiger Methoden.
+Zusätzlich muss die Connection in der Lage sein, ein link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/Context.html[`Context`,window=_blank]-Objekt übergeben zu bekommen.
+Dieses enthält die Konfiguration, die zur Herstellung der Verbindung verwendet werden soll.
+
+Beispielhafte Konfigurationseigenschaften sind:
+
+* Host und Port eines externen Systems
+* Verbindungs-Timeout
+* Ein Arbeitsverzeichnis
+
+Der bequemste Weg, die Konfiguration an die Connection zu übergeben, ist der Konstruktor.
+
+=== Konstruktor
+
+Wir implementieren einen Konstruktor, der den Context übergeben bekommt und eine long-Eigenschaft `interval` (aus der Konfiguration) in einem Feld speichert.
+Das `interval` definiert, in wie vielen Sekunden jeweils eine neue Nachricht erzeugt wird.
+Falls kein gültiger Wert gefunden wird, verwenden wir zur Vereinfachung 5 Sekunden als Standardwert.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnection.java[tags=constructor]
+....
+
+Das Argument `clock` wird verwendet, um die Systemzeit in Tests zu simulieren.
+
+=== Connect
+
+Nun können wir die Methode `connect` implementieren.
+Sie wird verwendet, um die Verbindung zum externen System herzustellen.
+In unserem Fall verwenden wir einen Java https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ScheduledExecutorService.html[`ScheduledExecutorService`], um in regelmäßigen Abständen eine Nachricht zu erzeugen.
+Der `ScheduledExecutorService` wird in einem Klassenfeld gespeichert.
+
+Das Feld `task` speichert das Future des geplanten Tasks.
+Dies ist notwendig, um den Task zu beenden, wenn die Verbindung geschlossen wird.
+
+Der Executor ruft die Methode `createMessage(factory)` alle `interval` Sekunden auf.
+Die Implementierung dieser Methode wird im nächsten Abschnitt gezeigt.
+
+Am Ende der Methode `connect` verwenden wir den übergebenen link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnectorListener.html[`ProducerConnectorListener`,window=_blank], um den Connector darüber zu informieren, dass die Verbindung hergestellt wurde.
+Dieser Listener fungiert als Callback zum Connector.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnection.java[tags=executor-field]
+
+    // ...
+
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnection.java[tags=connect-method]
+....
+
+Die Methode `createMessage` erzeugt die TRANSCONNECT-Nachricht mit aktuellem Datum und Uhrzeit.
+
+IMPORTANT: Der `OutputStream`, der zum Schreiben des Nachrichteninhalts verwendet wird, muss nach dem Schreiben der Nachricht geschlossen werden.
+
+Nachdem der Nachrichteninhalt geschrieben wurde, rufen wir den link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnectorListener.html[`ProducerConnectorListener`,window=_blank] auf, um die Nachricht zur weiteren Verarbeitung an TRANSCONNECT zu senden.
+Der Listener stellt zwei verschiedene Methoden für die Nachrichtenverarbeitung bereit:
+
+* link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnectorListener.html#onMessage(io.transconnect.connector.api.Message)[`onMessage`,window=_blank], um eine Nachricht an TRANSCONNECT zu senden und eine Antwort zu erwarten.
+Daher gibt sie ein `Future<Message>` zurück.
+* link:./{attachmentsdir}/javadoc/io/transconnect/connector/api/producer/ProducerConnectorListener.html#onAsyncMessage(io.transconnect.connector.api.Message)[`onAsyncMessage`,window=_blank], um eine Nachricht ohne erwartete Antwort zu senden.
+
+Im Falle einer Ausnahme informieren wir TRANSCONNECT über den Fehler.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnection.java[tags=createMessage-method]
+....
+
+NOTE: Es gibt bessere Möglichkeiten, die XML-Nachricht zu erzeugen, zum Beispiel mit xref:extensions/jaxb.adoc[JAXB] oder einem https://docs.oracle.com/en/java/javase/17/docs/api/java.xml/javax/xml/stream/XMLStreamWriter.html[`XMLStreamWriter`].
+In diesem Beispiel halten wir es einfach.
+
+Nun können wir Nachrichten in regelmäßigen Abständen erzeugen.
+
+=== Verbindungsprüfung
+
+Die Methode `isConnected` wird verwendet, um zu prüfen, ob die Verbindung noch besteht.
+In unserem Beispiel prüft sie, ob der `executor` nicht heruntergefahren ist.
+Eine weitere Prüfung könnte sein, ob die Verbindung zum externen System noch aktiv ist.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnection.java[tags=isConnected-method]
+....
+
+Diese Methode wird von TRANSCONNECT aufgerufen, um zu prüfen, ob die Verbindung noch besteht oder ob eine neue Verbindung erstellt werden muss.
+
+Die Prüfung erfolgt periodisch. Sollte die Verbindung getrennt sein, wird die Methode `connect` erneut aufgerufen. 
+Dies wird in zunehmend längeren Intervallen probiert, bis eine Verbindung hergestellt werden konnte. 
+Das Verhalten ist damit ähnlich wie bei Adaptern.
+
+=== Verbindung schließen
+
+Die Methode `close` wird verwendet, um die Verbindung zu schließen und Ressourcen freizugeben.
+In unserem Fall beenden wir den geplanten Task und fahren den Executor herunter.
+Im letzten Schritt informieren wir TRANSCONNECT über das Schließen der Verbindung über den Listener.
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/producer/DateTimeConnection.java[tags=close-method]
+....
+
+Diese Methode wird von TRANSCONNECT aufgerufen, um die Verbindung zu schließen.
+Es ist eine gute Praxis, die Methode defensiv zu schreiben, sodass sie keine Ausnahmen erzeugen kann.
+
+== Zusammenfassung
+
+In diesem Abschnitt haben wir gelernt, wie eine Connection für einen Producer-Connector erstellt wird.
+
+* Wir haben eine einfache Connection implementiert, die in regelmäßigen Abständen eine Nachricht erzeugt.
+* Wir wissen, wie die Konfiguration an die Connection übergeben wird.
+* Wir haben gesehen, wie der `ProducerConnectorListener` verwendet wird, um den Connector über den Verbindungsstatus zu informieren und Nachrichten weiterzugeben.
+
+Im nächsten Abschnitt erstellen wir die Connector-Klasse, die die Connection erzeugt und die Konfiguration verarbeitet.

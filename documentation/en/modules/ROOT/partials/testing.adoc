@@ -1,0 +1,108 @@
+= Testing
+
+When testing a connector, tests should be written to ensure that the connector behaves as expected. According to the test pyramid it can be distinguished between three types of tests:
+
+* unit tests
+* integration tests and
+* end-to-end tests.
+
+== Unit Tests
+
+Unit tests can easily be implemented with the help of test frameworks such as JUnit. Mocking of individual components is usually done by a mocking framework like Mockito. The focus of unit tests should be to test individual components in isolation. That also means that external dependencies such as the target system a connector connects to should be mocked away to ensure that the tests are fast and reliable.
+
+== Integration Tests
+
+Integration tests are used to test the interaction between the connector and the target system. The focus of integration tests is to ensure that the connector behaves as expected when interacting with a real target system.
+
+=== Testing of Consumer Connectors
+
+The basic interface of a consumer connector is a TRANSCONNECT message. An input message is sent to the connector, the connector processes the message and returns a result message. The result message is then compared to an expected result message.
+
+The following sequence diagram shows the test workflow for consumer connectors:
+
+.test workflow for consumer connectors
+[plantuml]
+....
+IntegrationTest -> Configuration: create
+Configuration --> IntegrationTest: configuration
+opt create extensions
+IntegrationTest -> Extension: create
+Extension --> IntegrationTest: extension
+end
+IntegrationTest -> Context: create with configuration and optional extensions
+Context --> IntegrationTest: context
+IntegrationTest -> Connector: create
+Connector --> IntegrationTest: connector
+IntegrationTest -> Connector: create connection with context
+Connector -> Connection: create
+Connection --> IntegrationTest: connection
+IntegrationTest -> Connection: connect
+IntegrationTest -> Message: create
+Message --> IntegrationTest: input message
+IntegrationTest -> WritableMessage: create
+WritableMessage --> IntegrationTest: result message
+IntegrationTest -> Connection: execute(interaction URI, input message, result message)
+note over IntegrationTest: Check result message against expected result message
+....
+
+The xref:introduction.adoc#download-example-project[`tutorial-example`] project contains an example of a simple integration test for a consumer connector. The test is located in the `src/test/java` directory of the project.
+
+=== Testing of Producer Connectors
+
+The basic interface of a producer connector is a TRANSCONNECT message. Once a condition is met (e.g. after a fixed interval of time or an event from an external system occurred), the connector produces a message that can be processed by a regular TRANSCONNECT process.
+
+The following sequence diagram shows the test workflow for producer connectors:
+
+.test workflow for producer connectors
+[plantuml]
+....
+IntegrationTest -> Configuration: create
+Configuration --> IntegrationTest: configuration
+opt create extensions
+IntegrationTest -> Extension: create
+Extension --> IntegrationTest: extension
+end
+IntegrationTest -> Context: create with configuration and optional extensions
+Context --> IntegrationTest: context
+IntegrationTest -> Connector: create
+Connector --> IntegrationTest: connector
+IntegrationTest -> Connector: create connection with context
+Connector -> Connection: create
+Connection --> IntegrationTest: connection
+IntegrationTest -> MessageFactory: create
+MessageFactory --> IntegrationTest: message factory
+IntegrationTest -> ProducerConnectorListener: create
+ProducerConnectorListener --> IntegrationTest: listener
+IntegrationTest -> Connection: connect with message factory and listener
+...Wait for messages produced by the connector...
+note over IntegrationTest: Check result message collected in listener against expected result message
+....
+
+=== Test Fixtures
+
+The test fixtures of the module `io.transconnect.connector:api` contain classes that can be used to create the basic setup for tests of connectors.
+
+To be able to use the test fixtures in your test code, add the following dependency to the `build.gradle.kts` file:
+
+[source,gradle]
+....
+dependencies {
+    testImplementation(testFixtures("io.transconnect.connector:api:0.0.1"))
+}
+....
+
+`MockContext`:: is a mock implementation of the `Context` interface. It can be used to create a context that is then used to create a connector.
+
+`MockConfiguration`:: is a mock implementation of the `Configuration` interface. It can be used to create a connector configuration that is then used to create a `Context`.
+
+`MockMessage`:: is a mock implementation of the `Message` interface. It can be used to create a message that is then used as input message for the connector during the execution of an interaction.
+
+`MockWritableMessage`:: is a mock implementation of the `WritableMessage` interface. It can be used to create a writable message that is then filled by the connector during the execution of an interaction. After test execution the content of this message can be checked against an expected result message.
+
+`MessageUtils`:: contains utility methods that should simplify message handling in test code.
+
+== End-to-End Tests
+
+End-to-end tests are used to test the complete interaction between TRANSCONNECT, the connector and the target system.
+
+Therefore, the connector needs to be deployed into a TRANSCONNECT installation. Testing can then be done within the TRANSCONNECT Manager by either using the test message wizard or by implementing test processes that make use of the connector.

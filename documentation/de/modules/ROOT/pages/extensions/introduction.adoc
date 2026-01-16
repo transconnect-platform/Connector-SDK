@@ -1,0 +1,49 @@
+= Erweiterungen
+
+Erweiterungen sind eine leistungsstarke Möglichkeit, die Funktionalität des Connector SDK zu erweitern.
+Sie ermöglichen es, neue Funktionen hinzuzufügen, bestehendes Verhalten zu ändern oder zusätzliche Konfigurationsoptionen für Connectoren bereitzustellen.
+
+== Was sind Erweiterungen?
+
+Erweiterungen bieten eine einfache Möglichkeit, benutzerdefinierte Funktionalität zum Connector SDK hinzuzufügen.
+Sie können verwendet werden, um bestehende Connectoren zu modifizieren oder neue Funktionen hinzuzufügen.
+Erweiterungen können die Fähigkeiten von Connectoren erweitern, ohne dass derselbe Code immer wieder geschrieben werden muss.
+
+Derzeit gibt es zwei Haupttypen von Erweiterungen im Connector SDK:
+
+Funktionale Erweiterungen (Functional Extensions):: Diese Erweiterungen stellen Funktionalität bereit, die von Connectoren genutzt werden kann.
+
+Deskriptor-Erweiterungen (Descriptor Extensions):: Diese Erweiterungen modifizieren den Connector-Deskriptor.
+In den meisten Fällen fügen sie dem Connector-Deskriptor neue Eigenschaften hinzu, sie können jedoch auch bestehende Eigenschaften ändern oder entfernen.
+Deskriptor-Erweiterungen können auch Konfigurationswerte auslesen, bevor eine Verbindung erstellt wird, was es ihnen ermöglicht, zusätzliche Funktionalität basierend auf der Konfiguration bereitzustellen.
+
+== Wie verwendet man eine Erweiterung?
+
+Um eine Erweiterung in Ihrem Connector zu verwenden, müssen Sie die Erweiterungs-Abhängigkeit zu Ihrer `build.gradle.kts`-Datei hinzufügen.
+Siehe dazu die Dokumentation der jeweiligen Erweiterung, die Sie verwenden möchten.
+
+Außerdem müssen Sie die Erweiterung in der link:../{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html[`IConnector`,window=_blank]-Klasse Ihres Connectors registrieren.
+Dies geschieht, indem Sie die Erweiterungsklasse zum `extensions`-Parameter der link:../{attachmentsdir}/javadoc/io/transconnect/connector/api/extension/Connector.html[`@Connector`,window=_blank]-Annotation hinzufügen.
+
+.Beispiel für die Registrierung einer Erweiterung in Ihrem Connector
+[source,java,indent=0]
+....
+@Connector(extensions = {
+    @Extension(ExampleExtension.class)
+})
+public class MyConnector implements ProducerConnector {
+    // Connector-Implementierung
+}
+....
+
+Dies stellt sicher, dass die Erweiterung geladen wird und über das link:../{attachmentsdir}/javadoc/io/transconnect/connector/api/Context.html[`Context`,window=_blank]-Objekt zugänglich ist.
+
+Die Funktionen der Erweiterung stehen dann innerhalb der Methoden Ihres Connectors über dieses `context` zur Verfügung.
+
+.Zugriff auf die Erweiterungsfunktionalität in Ihrem Connector
+[source,java,indent=0]
+....
+context.getExtension(ExampleExtension.class).doSomething();
+....
+
+Sofern nicht anders angegeben, wird für jeden Aufruf von link:../{attachmentsdir}/javadoc/io/transconnect/connector/api/IConnector.html#createConnection(io.transconnect.connector.api.Context)[`Connector#createConnection`,window=_blank] eine neue Instanz der Erweiterung erstellt, das heißt, sie ist an eine einzelne Verbindung gebunden.

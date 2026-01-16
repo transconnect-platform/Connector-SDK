@@ -1,0 +1,55 @@
+@startuml
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam ArrowColor #486090
+skinparam linetype ortho
+
+' Improved component styling
+skinparam rectangle {
+  BorderColor #5B6A8D
+  BackgroundColor white
+  RoundCorner 10
+}
+
+rectangle "Connector API" as CA {
+  rectangle "Producer\nConnector" as PC #F0E8FF
+  rectangle "Consumer\nConnector" as CC #FFE8E8
+}
+
+rectangle "Connection API" as COA {
+  rectangle "Producer\nConnection" as PCon #F0E8FF
+  rectangle "Consumer\nConnection" as CCon #FFE8E8
+}
+
+rectangle "Context" as Conf #E0E0FF
+
+rectangle "Message API" as MSG {
+  rectangle "Message" as M #FFFFD0
+  rectangle "WritableMessage" as WM #FFFFD0
+  rectangle "MessageFactory" as MF #FFFFD0
+}
+
+PC .down.> PCon : creates
+CC .down.> CCon : creates
+
+PC .right.> Conf : uses
+CC .right.> Conf : uses
+PCon .right.> Conf : configured by
+CCon .right.> Conf : configured by
+
+PCon ..> M : creates
+CCon ..> M : reads
+CCon ..> WM : writes
+
+WM -up-> M : extends
+
+legend right
+  <b>Component Types</b>
+  <color #F0E8FF>■</color> Producer Components
+  <color #FFE8E8>■</color> Consumer Components
+  <color #E0E0FF>■</color> Context
+  <color #FFFFD0>■</color> Message API
+endlegend
+@enduml

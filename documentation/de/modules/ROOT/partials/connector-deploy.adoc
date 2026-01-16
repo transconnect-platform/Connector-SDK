@@ -1,0 +1,66 @@
+= Deployen Sie Ihren Connector
+// erwartet, dass die folgenden Attribute vor dem Einbinden gesetzt sind
+// :connectorClassName: --> FQN der Connector-Klasse
+// :connectorInterfaceName: --> FQN des Connector-Interfaces
+
+Um den Connector zu deployen, müssen wir eine WAR-Datei erstellen, die die Connector-Klassen und die notwendigen Abhängigkeiten enthält.
+Das Gradle-Build-Skript wurde bereits im Abschnitt zur Einrichtung vorbereitet, jedoch benötigen wir noch eine zusätzliche Abhängigkeit, die den Connector in TRANSCONNECT registriert.
+
+== Fügen Sie war-connector-bridge zum Build-Skript hinzu
+
+Die `war-connector-bridge` ist eine Bibliothek, die die notwendigen Klassen zur Registrierung des Connectors bereitstellt.
+Es reicht aus, die Abhängigkeit zur Datei `build.gradle.kts` hinzuzufügen.
+
+[source,gradle]
+....
+dependencies {
+    // andere Abhängigkeiten
+    implementation("io.transconnect.connector:war-connector-bridge:${connectorSdkVersion}")
+}
+....
+
+== Fügen Sie eine Service Loader-Datei hinzu
+
+Die `war-connector-bridge` verwendet den Java Service Loader-Mechanismus, um den Connector zu finden.
+Daher müssen wir eine Datei im Verzeichnis `src/main/resources/META-INF/services` erstellen.
+Die Datei muss den Namen `{connectorInterfaceName}` haben und den vollqualifizierten Namen der Connector-Klasse enthalten.
+
+.Inhalt der Datei `src/main/resources/META-INF/services/{connectorInterfaceName}`:
+[source,subs="attributes+"]
+....
+{connectorClassName}
+....
+
+== Bauen Sie den Connector
+
+Nun können wir den Connector mit folgendem Befehl bauen:
+
+[source,console]
+....
+$ ./gradle clean build
+....
+
+Wenn der Build erfolgreich war, wird die WAR-Datei im Verzeichnis `build/libs` erstellt.
+Die WAR-Datei enthält alle Klassen, Ressourcen und Abhängigkeiten, die zum Ausführen des Connectors notwendig sind.
+
+== Deployen Sie den Connector
+
+Um den Connector zu deployen, müssen wir die WAR-Datei in das Verzeichnis `$TC_USER_HOME/connectors` von TRANSCONNECT kopieren.
+TRANSCONNECT wird den Connector automatisch deployen und in der UI verfügbar machen.
+
+NOTE: Das Verzeichnis `$TC_USER_HOME` ist das konfigurierte Benutzerverzeichnis von TRANSCONNECT.
+
+Während des Serverstarts von TRANSCONNECT wird der Connector automatisch erkannt und geladen.
+Dies wird im `core_http.log ` protokolliert.
+
+Nach dem Start des TRANSCONNECT Managers und Servers kann der Connector im Dialog „Neuen Adapter erstellen“ ausgewählt werden.
+
+== Zusammenfassung
+
+In diesem Abschnitt haben wir gelernt, wie man einen Connector in TRANSCONNECT deployt.
+
+* Wir haben die notwendigen Abhängigkeiten zum Build-Skript hinzugefügt und eine Service Loader-Datei erstellt.
+* Wir haben den Connector gebaut und die WAR-Datei in TRANSCONNECT kopiert.
+* Nach dem Start von TRANSCONNECT war der Connector in der UI verfügbar.
+
+Im nächsten Abschnitt werden wir betrachten, wie man den Connector testet.

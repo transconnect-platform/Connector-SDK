@@ -1,0 +1,10 @@
+== Beispielprojekt herunterladen
+
+Das komplette Beispielprojekt mit dem vollständigen Quellcode kann xref:attachment$tutorial-example.zip[hier] heruntergeladen werden.
+Laden Sie die ZIP-Datei herunter und extrahieren Sie sie in ein Verzeichnis Ihrer Wahl.
+Erstellen Sie das Projekt mit Gradle, indem Sie den folgenden Befehl im Projektverzeichnis ausführen:
+
+[source,console]
+....
+$ ./gradle clean build
+....

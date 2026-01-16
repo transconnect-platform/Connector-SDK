@@ -1,0 +1,182 @@
+= Message Attachments
+
+== Overview
+
+TRANSCONNECT messages can include attachments which allow you to send and receive binary data alongside the XML message body. This is useful for handling:
+
+* Text files
+* Images
+* PDFs
+* Spreadsheets
+* Other binary content
+
+This guide shows how to work with attachments in your connector implementations.
+
+== Reading Attachments
+
+=== Checking for Available Attachments
+
+Before accessing an attachment, check if it exists:
+
+[source,java,indent=0]
+....
+// Get all attachment IDs
+Set<String> attachmentIds = message.getAttachmentIds();
+
+// Check if a specific attachment exists
+if (message.getAttachmentIds().contains("myAttachment")) {
+    // Process the attachment
+}
+....
+
+=== Retrieve attachment metadata
+
+You can retrieve metadata such as the size of an attachment as follows:
+
+[source,java,indent=0]
+....
+long attachmentSize = message.getAttachmentSize(attachmentId);
+....
+
+=== Reading Text Content from Attachments
+
+For text-based attachments, use the following method:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=readTextAttachment]
+....
+
+=== Processing Text Files Line by Line
+
+You can process text files line by line:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=readTextFileLines]
+....
+
+=== Reading Binary Attachments
+
+For binary files, use the following method:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=readBinaryAttachment]
+....
+
+== Writing Attachments
+
+=== Creating Text Attachments
+
+To create a text attachment in your response:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=writeTextAttachment]
+....
+
+=== Creating Binary Attachments
+
+To create a binary attachment:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=writeBinaryAttachment]
+....
+
+== Extended Example: Counting Characters in Attachments
+
+Here's how to extend our character counter to include text from attachments:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=executeCountCharactersWithAttachments]
+....
+
+== Handling Large Attachments
+
+For large attachments, it's better to process the content in chunks rather than loading everything into memory at once:
+
+[source,java,indent=0]
+....
+include::example$tutorial-example/src/main/java/com/example/connector/consumer/attachment/CountCharactersConnection.java[tags=processLargeAttachment]
+....
+
+== Common Use Cases
+
+=== Processing Email with Attachments
+
+[source,java,indent=0]
+....
+// Check for email body and attachments
+if (message.getAttachmentIds().contains("emailBody")) {
+    // Process email content
+    String emailText = readTextAttachment(message, "emailBody");
+
+    // Process each attachment
+    for (String attachmentId : message.getAttachmentIds()) {
+        if (attachmentId.startsWith("attachment_")) {
+            // Process each email attachment
+            byte[] attachmentData = readBinaryAttachment(message, attachmentId);
+            // Process based on content type
+        }
+    }
+}
+....
+
+=== Handling Images
+
+[source,java,indent=0]
+....
+// Process an image attachment
+if (message.getAttachmentIds().contains("image")) {
+    byte[] imageData = readBinaryAttachment(message, "image");
+    // Process the image data
+    // Example: ImageIO.read(new ByteArrayInputStream(imageData));
+}
+....
+
+== Best Practices
+
+1. **Always check existence**: Verify that an attachment exists before accessing it
+2. **Use try-with-resources**: Ensure streams are properly closed
+3. **Handle large attachments efficiently**: For large attachments, process them in chunks
+4. **Set appropriate timeouts**: When processing large attachments, configure appropriate timeouts
+5. **Validate attachment content**: Implement validation to ensure attachment content meets expected format
+
+== Troubleshooting
+
+[cols="1,3", options="header"]
+|===
+|Problem |Solution
+|Attachment not found |Verify the attachment ID is correct and the attachment exists in the message
+|OutOfMemoryError |Process large attachments in chunks rather than loading entirely into memory
+|Character encoding issues |Specify the correct charset when converting bytes to string (e.g., UTF-8, ISO-8859-1)
+|IOException during reading |Ensure proper exception handling and consider retry mechanisms
+|===
+
+== Complete Implementation
+
+For a complete implementation example, see the full `CountCharactersConnection` class:
+
+[source,java,indent=0]
+....
+public final class CountCharactersConnection implements ConsumerConnection {
+    // Methods to implement
+
+    // Reading attachments
+    private String readTextAttachment(Message message, String attachmentId) { ... }
+    private List<String> readLinesFromAttachment(Message message, String attachmentId) { ... }
+    private byte[] readBinaryAttachment(Message message, String attachmentId) { ... }
+
+    // Writing attachments
+    private void writeTextAttachment(WritableMessage response, String attachmentId, String content) { ... }
+    private void writeBinaryAttachment(WritableMessage response, String attachmentId, byte[] data) { ... }
+
+    // Processing attachments
+    private void executeCountCharactersWithAttachments(Message message, WritableMessage response,
+                                                     boolean countWhitespaces) { ... }
+    private void processLargeAttachment(Message message, String attachmentId) { ... }
+}
+....

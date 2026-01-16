@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://example.com/connector/DateTime/execute/out"
+            xmlns="http://example.com/connector/DateTime/execute/out"
+            elementFormDefault="qualified">
+
+    <xsd:element name="ROOT">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="DATETIME" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

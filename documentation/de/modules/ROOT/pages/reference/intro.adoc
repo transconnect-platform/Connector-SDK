@@ -1,0 +1,29 @@
+= Referenzen
+
+Dieser Abschnitt bietet detaillierte technische Referenzinformationen für Entwickler, die mit dem TRANSCONNECT SDK arbeiten. Während Tutorials und How-To-Anleitungen sich auf praktische Umsetzungsschritte konzentrieren, liefert die Referenzdokumentation umfassende Details zu Komponenten, Strukturen und Spezifikationen.
+
+== Verfügbare Referenzdokumentation
+
+[cols="1,3", options="header"]
+|===
+|Referenz |Beschreibung
+
+|xref:reference/configuration.adoc[Konfigurationsreferenz]
+|Vollständige Dokumentation der Konfigurationsmodelle für Connectoren, Eigenschaftstypen, Klassenbeziehungen und Implementierungsbeispiele für sowohl Consumer- als auch Producer-Connectoren.
+|===
+
+== Zweck der Referenzdokumentation
+
+Die Referenzdokumentation hilft Ihnen:
+
+* Vollständige technische Spezifikationen zu verstehen
+* Präzise Details zu Konfigurationsoptionen zu finden
+* Klassenbeziehungen und Vererbungshierarchien einzusehen
+* Auf Implementierungsbeispiele zuzugreifen
+
+Beim Erstellen oder Troubleshooten von Connectoren nutzen Sie diesen Abschnitt, um verbindliche Informationen darüber zu erhalten, wie TRANSCONNECT-Komponenten strukturiert und konfiguriert sind.
+
+[TIP]
+====
+Für Schritt-für-Schritt-Anleitungen siehe die Connector-Tutorials. Für Implementierungstechniken schauen Sie in die xref:howto/intro.adoc[How-To Guides].
+====

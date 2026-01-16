@@ -1,0 +1,104 @@
+@startuml
+skinparam backgroundColor white
+skinparam componentStyle uml2
+skinparam groupInheritance false
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam linetype ortho
+
+' Use meaningful colors
+skinparam package {
+  BackgroundColor #f8f8f8
+  BorderColor #283593
+}
+
+skinparam class {
+  BackgroundColor #f5f5f5
+  BorderColor #3949ab
+}
+
+skinparam interface {
+  BackgroundColor #e3f2fd
+  BorderColor #1976d2
+}
+
+skinparam enum {
+  BackgroundColor #e0f2f1
+  BorderColor #00897b
+}
+
+' Add a legend
+legend
+  <back:#f5f5f5>■</back> Class
+  <back:#e3f2fd>□</back> Interface
+  <back:#e0f2f1>○</back> Enumeration
+  ――→ Association
+  ――▷ Implementation
+endlegend
+
+package "Connector Types" {
+  class CommonConnectorDescriptor {
+    +URI type
+    +String[] labels
+    +String version
+    +String vendor
+    +LocalizedText[] displayName
+    +LocalizedText[] description
+  }
+
+  class ConsumerConnector {
+    +CommonConnectorDescriptor common
+    +IConnectorProperty[] properties
+    +Interaction[] interactions
+  }
+
+  class ProducerConnector {
+    +CommonConnectorDescriptor common
+    +IConnectorProperty[] properties
+    +URI producedMessageXsd
+    +URI resultMessageXsd
+  }
+
+  ConsumerConnector --> CommonConnectorDescriptor : uses
+  ProducerConnector --> CommonConnectorDescriptor : uses
+}
+
+package "Properties" {
+  interface IConnectorProperty {
+    +String getId()
+    +LocalizedText[] getDisplayName()
+    +LocalizedText[] getDescription()
+    +ConnectorPropertyType getType()
+    +boolean isRequired()
+  }
+
+  class ConnectorProperty implements IConnectorProperty {
+    +String id
+    +ConnectorPropertyType type
+    +Serializable defaultValue
+    +boolean required
+    +ValidatorConfig validator
+    +PropertyDependency[] dependsOn
+  }
+
+  class SelectConnectorProperty implements IConnectorProperty {
+    +SelectableEntry[] entries
+  }
+
+  enum ConnectorPropertyType {
+    TEXT
+    SECRET
+    INTEGER
+    FLOAT
+    BOOLEAN
+    SELECT
+  }
+
+  ConnectorProperty --> ConnectorPropertyType
+  SelectConnectorProperty --> ConnectorPropertyType
+}
+
+ConsumerConnector --> IConnectorProperty : contains
+ProducerConnector --> IConnectorProperty : contains
+
+@enduml

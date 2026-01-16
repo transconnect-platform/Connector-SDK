@@ -1,0 +1,87 @@
+= Microsoft OAuth2 Token Provider
+
+The Microsoft OAuth2 Token Provider extension provides Microsoft-specific OAuth2 authentication and token management for TRANSCONNECT connectors.
+It uses the Microsoft Authentication Library (MSAL4j) to handle OAuth2 client credentials flow.
+This extension works seamlessly with the OAuth2 properties extension.
+
+== Features
+
+* Microsoft OAuth2 client credentials flow
+* Integration with Azure AD and Office 365 services
+
+== Dependencies
+
+The following dependencies must be added to the `build.gradle.kts` file of the connector module:
+
+[source,kotlin]
+....
+dependencies {
+    implementation("io.transconnect.connector.extension:ms-oauth2-token-provider:$version")
+}
+....
+
+== How to use the Microsoft OAuth2 Token Provider extension?
+
+To associate the extension with the connector, you need to add the extension to the connector annotation of the connector class:
+
+[source,java,indent=0]
+....
+@Connector(extensions = {@Extension(MicrosoftOAuth2TokenProviderExtension.class)})
+....
+
+== Usage in Connector
+
+=== Extension Mode
+
+[source,java,indent=0]
+....
+@Override
+public ConsumingConnection(Context context) {
+    MicrosoftOAuth2TokenProviderExtension tokenProvider = this.context
+                .getExtension(MicrosoftOAuth2TokenProviderExtension.class)
+                .orElseThrow(() -> new IllegalStateException(
+                        "MicrosoftOAuth2TokenProviderExtension is required but not available"));
+    tokenProvider.readConfiguration(config);
+    
+    // Get access token for Microsoft API calls
+    String accessToken = tokenProvider.getAccessToken();
+}
+....
+
+== Configuration
+
+This extension reads the OAuth2 configuration properties provided by the OAuth2 properties extension:
+
+[cols="1,1,2",options="header"]
+|===
+|Property |Required |Description
+
+|`oauth2.authUrl`
+|Yes
+|Microsoft OAuth2 token endpoint URL
+
+|`oauth2.clientId`
+|Yes
+|Azure AD application client ID
+
+|`oauth2.clientSecret`
+|Yes
+|Azure AD application client secret
+
+|`oauth2.scope`
+|No
+|OAuth2 permission scope
+|===
+
+== API Methods
+
+=== MicrosoftOAuth2TokenProviderExtension
+
+* `readConfiguration(config)` - Initialize the extension with configuration
+* `getAccessToken()` - Get a valid access token (cached or fresh)
+* `isInitialized()` - Check if the extension is initialized
+* `reset()` - Reset the extension state
+* `getClientApp()` - Get the underlying MSAL4j client application
+
+IMPORTANT: The extension handles token caching and refresh automatically using MSAL4j.
+Ensure proper Azure AD application configuration for successful authentication.

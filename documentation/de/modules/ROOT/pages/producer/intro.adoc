@@ -1,0 +1,38 @@
+= Erstellen eines Producer Connectors
+
+Diese Anleitung erklärt, wie man einen Producer Connector mit dem Connector SDK erstellt.
+Dazu erstellen wir einen einfachen Connector, der in regelmäßigen Abständen eine Nachricht generiert.
+
+== Der Date Time Producer Connector
+
+Der Date Time Producer Connector ist ein einfacher Connector, der eine Nachricht mit dem aktuellen Datum und der aktuellen Uhrzeit erzeugt.
+Er besitzt nur eine einzige Konfigurationsoption: das Intervall in Sekunden, in dem der Connector eine neue Nachricht generieren soll.
+
+.Die Konfiguration des Date Time Producer Connectors
+[cols="2,3,2,1",options="header"]
+|===
+| Konfigurationsschlüssel
+| Beschreibung
+| Standardwert
+| Erforderlich
+
+| interval
+| Das Intervall in Sekunden, in dem der Connector eine neue Nachricht generieren soll.
+| 60
+| Ja
+|===
+
+Jedes Mal, wenn das Intervall erreicht ist, wird eine neue Nachricht generiert und an TRANSCONNECT gesendet.
+Die Nachricht ist ein einfaches XML-Dokument, das das aktuelle Datum und die aktuelle Uhrzeit enthält.
+
+.Ein Beispiel für eine vom Date Time Producer Connector generierte Nachricht
+[source,xml]
+....
+<ROOT>
+    <DATETIME>2021-01-01T12:00:00</DATETIME>
+</ROOT>
+....
+
+Nachdem wir nun ein grundlegendes Verständnis des Connectors haben, beginnen wir mit der Projekterstellung.
+
+include::partial$download-sample.adoc[]

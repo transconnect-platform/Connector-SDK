@@ -1,0 +1,27 @@
+= Troubleshooting
+
+Wenn Sie Probleme beim Erstellen oder der Benutzung Ihres Connectors haben, finden Sie hier einige häufige Probleme und deren Lösungen.
+
+== Mein Connector wird nicht in der Liste der verfügbaren Connectoren angezeigt
+
+* Stellen Sie sicher, dass die WAR-Datei korrekt im Verzeichnis `$TC_USER_HOME/connectors` abgelegt wurde.
+* Überprüfen Sie die `core_http.log`-Datei im Verzeichnis `$TC_USER_HOME/logs` auf Fehlermeldungen.
+* Stellen Sie sicher, dass die Service-Loader-Datei im Verzeichnis `src/main/resources/META-INF/services` korrekt erstellt wurde und den vollqualifizierten Namen der Connector-Klasse enthält.
+* Überprüfen Sie, ob alle notwendigen Abhängigkeiten im Build-Skript (`build.gradle.kts`) hinzugefügt wurden.
+
+== Fehler beim Kompilieren des Connector Codes
+
+* Stellen Sie sicher, dass Sie Java 17 verwenden.
+* Überprüfen Sie die `build.gradle.kts`-Datei auf fehlende oder falsche Abhängigkeiten.
+* Führen Sie `./gradlew clean build` aus, um sicherzustellen, dass alle Abhängigkeiten korrekt heruntergeladen und der Code kompiliert wird.
+* Überprüfen Sie die Konsolenausgabe auf spezifische Fehlermeldungen und beheben Sie diese entsprechend.
+
+== Probleme bei der Ausführung des Connectors
+* Überprüfen Sie die `core_slf4j.log`-Datei im Verzeichnis `$TC_USER_HOME/logs` auf Fehlermeldungen aus dem Connector.
+* Stellen Sie sicher, dass die Verbindungseigenschaften korrekt konfiguriert sind.
+* Testen Sie die Verbindungseigenschaften außerhalb von TRANSCONNECT, um sicherzustellen, dass sie korrekt sind (z.B. Datenbankverbindung, API-Endpunkt).
+* Fügen Sie zusätzliche Protokollierung in Ihrem Connector-Code hinzu, um den Fehler genauer zu lokalisieren.
+* Stellen Sie sicher, dass alle erforderlichen Erweiterungen korrekt registriert und konfiguriert sind, wenn Ihr Connector diese verwendet.
+* Versetzen Sie den TRANSCONNECT Server in den Remote-Debug-Modus, um Ihren Connector-Code Schritt für Schritt zu debuggen.
++
+Weitere Informationen zum Remote-Debug-Modus finden Sie im Handbuch unter `Entwicklung` -> `Debugging`.

@@ -1,0 +1,64 @@
+@startuml
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam sequenceArrowThickness 2
+skinparam sequenceMessageAlign center
+skinparam backgroundColor white
+skinparam ArrowColor #486090
+
+' Better styling for sequence diagrams
+skinparam sequence {
+  LifeLineBorderColor #3F51B5
+  LifeLineBackgroundColor #E8EAF6
+  ParticipantBorderColor #3F51B5
+  ParticipantBackgroundColor #E8EAF6
+  BoxBorderColor #7986CB
+  BoxBackgroundColor #E8EAF6
+}
+
+participant "TransConnect" as TC
+participant "ProducerConnector" as PC
+participant "ProducerConnection" as PCon
+participant "External System" as ES
+participant "ProducerConnectorListener" as PCL
+
+box "1. Initialization Phase" #E8F0FF
+  TC -> PC: createConnection(context)
+  activate PC
+  PC --> TC: new ProducerConnection
+  deactivate PC
+end box
+
+box "2. Connection Phase" #E0F7FA
+  TC -> PCon: connect(messageFactory, listener)
+  note left: The connect method is\n executed in a separate thread.
+  activate PCon
+  PCon -> ES: establish connection
+  PCon -> PCL: onConnect()
+  PCon --> TC: connection established
+  deactivate PCon
+end box
+
+box "3. Message Generation Phase" #E8F5E9
+  ES -> PCon: new data available
+  note right: External system pushes data\n to the producer connection.
+  activate PCon
+  PCon -> TC: messageFactory.createMessage()
+  TC --> PCon: new WritableMessage
+  PCon -> PCon: populate message
+  PCon -> PCL: onMessage() or onAsyncMessage()
+  PCon --> ES: processing complete
+  deactivate PCon
+end box
+
+box "4. Termination Phase" #FFF8E1
+  TC -> PCon: close()
+  activate PCon
+  PCon -> ES: terminate connection
+  PCon -> PCL: onDisconnect()
+  PCon --> TC: connection closed
+  deactivate PCon
+end box
+
+@enduml
