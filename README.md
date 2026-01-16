@@ -1,4 +1,4 @@
-# TransConnect Connector SDK
+# TRANSCONNECT Connector SDK
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.transconnect.connector/api)](https://central.sonatype.com/artifact/io.transconnect.connector/api)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -37,7 +37,7 @@ Add the following dependency to your `pom.xml`:
 <dependency>
     <groupId>io.transconnect.connector</groupId>
     <artifactId>api</artifactId>
-    <version>1.0.0</version>
+    <version>0.9.6</version>
 </dependency>
 ```
 
@@ -47,7 +47,7 @@ Add the following to your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("io.transconnect.connector:api:1.0.0")
+    implementation("io.transconnect.connector:api:0.9.6")
 }
 ```
 
@@ -57,7 +57,7 @@ Add the following to your `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'io.transconnect.connector:api:1.0.0'
+    implementation 'io.transconnect.connector:api:0.9.6'
 }
 ```
 
@@ -188,13 +188,12 @@ If you find a bug or have a feature request:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
 
 ## Support
 
 - **Documentation**: [Full documentation](documentation/)
 - **Issues**: [GitHub Issues](https://github.com/transconnect-platform/Connector-SDK/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/transconnect-platform/Connector-SDK/discussions)
 - **Website**: [transconnect.io](https://transconnect.io)
 
 ---
