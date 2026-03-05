@@ -8,7 +8,7 @@ plugins {
 // base.archivesName.set("connector-api")
 base.archivesName.set("api")
 
-description = "Core API for building connectors for the TRANSCONNECT platform"
+description = "Core API for building Connectors for the TRANSCONNECT platform"
 
 publishConfig {
     publishToNexus.set(true)
