@@ -10,6 +10,15 @@ val connectorSdkVersion = project.findProperty("connectorSdkVersion") as String?
 
 repositories {
     mavenCentral()
+    maven {
+        name = "Nexus"
+        url = uri("https://nexus.dev.transconnect.io/repository/transconnect-maven-public/")
+        credentials {
+            username = (System.getProperty("nexus.maven.username") ?: providers.gradleProperty("nexus.maven.username").orNull)
+            password = (System.getProperty("nexus.maven.password") ?: providers.gradleProperty("nexus.maven.password").orNull)
+        }
+    }
+
 }
 
 dependencies {

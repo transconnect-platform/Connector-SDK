@@ -1,12 +1,34 @@
 [versions]
-junit = "5.10.0"
+# Plugin versions
+lombok-plugin = "8.4"
+spotless-plugin = "6.25.0"
+palantirJavaFormatter = "2.47.0"
+jacoco-log-plugin = "4.0.1"
+vanniktech-maven-publish = "0.30.0"
+
+# Common library versions
+slf4j = "1.7.36"
+junit = "5.13.3"
+mockito = "5.6.0"
 testng = "7.4.0"
 
+transconnect = "4.5.0"
+jackson = "2.17.1"
+jakarta-servlet-api = "6.1.0"
+junit-suite = "1.13.3"
+
 [libraries]
-junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-junit-suite = { module = "org.junit.platform:junit-platform-suite", version = "1.14.1" }
+# Gradle plugins as libraries (for buildSrc)
+spotlessPlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless-plugin" }
+lombokPlugin = { module = "io.freefair.gradle:lombok-plugin", version.ref = "lombok-plugin" }
+vanniktechMavenPublishPlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktech-maven-publish" }
+
+slf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+jakarta-servlet-api = { group = "jakarta.servlet", name = "jakarta.servlet-api", version.ref = "jakarta-servlet-api" }
+
+junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-suite = { group = "org.junit.platform", name = "junit-platform-suite", version.ref = "junit-suite" }
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 testng = { module = "org.testng:testng", version.ref = "testng" }
 
 [plugins]
