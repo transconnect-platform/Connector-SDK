@@ -6,19 +6,10 @@ plugins {
 version = "1.0.0"
 
 // Connector SDK version to compile against
-val connectorSdkVersion = project.findProperty("connectorSdkVersion") as String? ?: "0.9.6"
+val connectorSdkVersion = project.findProperty("connectorSdkVersion") as String? ?: "1.0.0"
 
 repositories {
     mavenCentral()
-    maven {
-        name = "Nexus"
-        url = uri("https://nexus.dev.transconnect.io/repository/transconnect-maven-public/")
-        credentials {
-            username = (System.getProperty("nexus.maven.username") ?: providers.gradleProperty("nexus.maven.username").orNull)
-            password = (System.getProperty("nexus.maven.password") ?: providers.gradleProperty("nexus.maven.password").orNull)
-        }
-    }
-
 }
 
 dependencies {

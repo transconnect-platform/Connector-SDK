@@ -4,15 +4,13 @@ plugins {
     id("transconnect.unified-maven-publish")
 }
 
-// we need to decide which name we should use
-// base.archivesName.set("connector-api")
 base.archivesName.set("api")
 
 description = "Core API for building Connectors for the TRANSCONNECT platform"
 
 publishConfig {
-    publishToNexus.set(true)
-    publishToMavenCentral.set(true)
+    publishToNexus.set(false)
+    publishToMavenCentral.set(false)
 }
 
 // Copy JavaDoc to Antora documentation (EN and DE)
