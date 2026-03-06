@@ -37,7 +37,7 @@ Add the following dependency to your `pom.xml`:
 <dependency>
     <groupId>io.transconnect.connector</groupId>
     <artifactId>api</artifactId>
-    <version>0.9.6</version>
+    <version>${version}</version>
 </dependency>
 ```
 
@@ -47,7 +47,7 @@ Add the following to your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("io.transconnect.connector:api:0.9.6")
+    implementation("io.transconnect.connector:api:${version}")
 }
 ```
 
@@ -57,7 +57,7 @@ Add the following to your `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'io.transconnect.connector:api:0.9.6'
+    implementation 'io.transconnect.connector:api:${version}'
 }
 ```
 
@@ -164,6 +164,7 @@ We welcome contributions from the community! Here's how you can help:
 ### Reporting Issues
 
 If you find a bug or have a feature request:
+
 1. Check the [issue tracker](https://github.com/transconnect-platform/Connector-SDK/issues) for existing issues
 2. Create a new issue with a clear description and steps to reproduce (for bugs)
 3. Use the appropriate issue template
@@ -199,3 +200,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) f
 ---
 
 **Built with ❤️ by the TRANSCONNECT Team**
+
