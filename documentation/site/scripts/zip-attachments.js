@@ -7,7 +7,7 @@ const archiver = require('archiver');
 const config = {
   languages: ['de', 'en'],
   component: 'dev-doc',
-  version: '4.X.X',
+  version: '5.0.0',
   attachmentFolder: 'tutorial-example'
 };
 

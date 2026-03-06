@@ -2,7 +2,7 @@
 # The rest of the properties is defined in the frontend repository.
 # See https://docs.antora.org/antora/latest/distributed-component-version/ for more information
 name: dev-doc
-version: 4.X.X
+version: 5.0.0
 start_page: introduction.adoc
 nav:
   - modules/ROOT/connector-sdk-nav.adoc

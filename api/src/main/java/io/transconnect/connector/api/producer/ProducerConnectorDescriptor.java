@@ -31,6 +31,7 @@ public class ProducerConnectorDescriptor implements ConnectorDescriptor {
     /**
      * Array of property specifications to configure the Connector.
      */
+    @Builder.Default
     private IConnectorProperty[] properties = new IConnectorProperty[0];
 
     /**

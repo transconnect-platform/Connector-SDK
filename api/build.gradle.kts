@@ -1,12 +1,16 @@
 plugins {
     `java-library`
     id("java-test-fixtures")
+    id("transconnect.unified-maven-publish")
 }
 
-base.archivesName.set("connector-api")
+base.archivesName.set("api")
 
-java {
-    withJavadocJar()
+description = "Core API for building Connectors for the TRANSCONNECT platform"
+
+publishConfig {
+    publishToNexus.set(false)
+    publishToMavenCentral.set(false)
 }
 
 // Copy JavaDoc to Antora documentation (EN and DE)
@@ -29,4 +33,10 @@ val copyJavadocToAntora by tasks.registering {
 
 dependencies {
     testImplementation(libs.testng)
+    testImplementation("org.mockito:mockito-core:5.21.0")
+    testImplementation(libs.junit)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

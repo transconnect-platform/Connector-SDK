@@ -1,24 +1,21 @@
 plugins {
-    alias(libs.plugins.lombok) apply false
+    // Convention plugins from buildSrc are applied in subprojects
 }
 
-group = "io.transconnect.connector"
-version = "0.9.6"
-description = "SDK for building connectors for TRANSCONNECT"
-
-allprojects {
-    repositories {
-        mavenCentral()
+// Task to print the version for CI/CD pipelines
+// Gets version from :api subproject which has the calculated version (with -SNAPSHOT suffix)
+tasks.register("printVersion") {
+    doLast {
+        val apiProject = project.findProject(":api")
+        if (apiProject != null) {
+            println(apiProject.version)
+        } else {
+            println(project.version)
+        }
     }
 }
 
 subprojects {
-    apply(plugin = "java")
-    apply(plugin = "io.freefair.lombok")
-
-    configure<JavaPluginExtension> {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
-        }
-    }
+    // Apply Java conventions to all subprojects
+    apply(plugin = "transconnect.java-conventions")
 }

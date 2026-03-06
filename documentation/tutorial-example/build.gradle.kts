@@ -6,7 +6,7 @@ plugins {
 version = "1.0.0"
 
 // Connector SDK version to compile against
-val connectorSdkVersion = project.findProperty("connectorSdkVersion") as String? ?: "0.9.6"
+val connectorSdkVersion = project.findProperty("connectorSdkVersion") as String? ?: "1.0.0"
 
 repositories {
     mavenCentral()
