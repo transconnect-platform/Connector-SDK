@@ -6,7 +6,7 @@ plugins {
 version = "1.0.0"
 
 // Connector SDK version to compile against
-val connectorSdkVersion = project.findProperty("connectorSdkVersion") as String? ?: "1.0.0"
+val connectorSdkVersion = project.findProperty("connectorSdkVersion") as String? ?: "1.1.1"
 
 repositories {
     mavenCentral()
@@ -16,7 +16,6 @@ dependencies {
 
     // Connector SDK
     providedCompile("io.transconnect.connector:api:${connectorSdkVersion}")
-    implementation("io.transconnect.connector:war-connector-bridge:${connectorSdkVersion}")
     implementation("io.transconnect.connector.extensions:yaml-descriptor:${connectorSdkVersion}")
 
     providedCompile("org.slf4j:slf4j-api:1.7.36")

@@ -87,7 +87,7 @@ To be able to use the test fixtures in your test code, add the following depende
 [source,gradle]
 ....
 dependencies {
-    testImplementation(testFixtures("io.transconnect.connector:api:0.0.1"))
+    testImplementation(testFixtures("io.transconnect.connector:api:1.1.1"))
 }
 ....
 
