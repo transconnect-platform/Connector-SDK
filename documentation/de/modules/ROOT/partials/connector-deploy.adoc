@@ -4,25 +4,13 @@
 // :connectorInterfaceName: --> FQN des Connector-Interfaces
 
 Um den Connector zu deployen, müssen wir eine WAR-Datei erstellen, die die Connector-Klassen und die notwendigen Abhängigkeiten enthält.
-Das Gradle-Build-Skript wurde bereits im Abschnitt zur Einrichtung vorbereitet, jedoch benötigen wir noch eine zusätzliche Abhängigkeit, die den Connector in TRANSCONNECT registriert.
+Das Gradle-Build-Skript wurde bereits im Abschnitt zur Einrichtung vorbereitet.
 
-== Fügen Sie war-connector-bridge zum Build-Skript hinzu
-
-Die `war-connector-bridge` ist eine Bibliothek, die die notwendigen Klassen zur Registrierung des Connectors bereitstellt.
-Es reicht aus, die Abhängigkeit zur Datei `build.gradle.kts` hinzuzufügen.
-
-[source,gradle]
-....
-dependencies {
-    // andere Abhängigkeiten
-    implementation("io.transconnect.connector:war-connector-bridge:${connectorSdkVersion}")
-}
-....
+NOTE: Ab Connector-SDK-Version 1.1.1 ist die Abhängigkeit `war-connector-bridge` nicht mehr erforderlich. Der Server registriert den Connector automatisch, sobald seine WAR-Datei deployt wird.
 
 == Fügen Sie eine Service Loader-Datei hinzu
 
-Die `war-connector-bridge` verwendet den Java Service Loader-Mechanismus, um den Connector zu finden.
-Daher müssen wir eine Datei im Verzeichnis `src/main/resources/META-INF/services` erstellen.
+Wir müssen eine Datei im Verzeichnis `src/main/resources/META-INF/services` erstellen.
 Die Datei muss den Namen `{connectorInterfaceName}` haben und den vollqualifizierten Namen der Connector-Klasse enthalten.
 
 .Inhalt der Datei `src/main/resources/META-INF/services/{connectorInterfaceName}`:
@@ -59,7 +47,7 @@ Nach dem Start des TRANSCONNECT Managers und Servers kann der Connector im Dialo
 
 In diesem Abschnitt haben wir gelernt, wie man einen Connector in TRANSCONNECT deployt.
 
-* Wir haben die notwendigen Abhängigkeiten zum Build-Skript hinzugefügt und eine Service Loader-Datei erstellt.
+* Wir haben eine Service Loader-Datei erstellt, damit der Server den Connector erkennen kann.
 * Wir haben den Connector gebaut und die WAR-Datei in TRANSCONNECT kopiert.
 * Nach dem Start von TRANSCONNECT war der Connector in der UI verfügbar.
 
