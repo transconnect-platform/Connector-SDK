@@ -1,0 +1,73 @@
+= Connector Extensions
+:icons: font
+
+== What are extensions?
+
+Extensions provide a way to add custom functionality to the Connector SDK.
+
+They enable you to enhance a connector’s capabilities by introducing new features or modifying existing ones.
+You can use extensions to adapt existing connectors or to expand their functionality.
+
+== What types of extensions are available?
+
+It is challenging to write a general purpose API for extensions, so the connector SDK provides a number of different types of extensions.
+
+The following types of extensions are currently available:
+
+* *Connector description manipulating extensions*
++
+Extensions of this type are used to manipulate the connector descriptions.
+This includes adding new properties, modifying existing properties, and removing properties.
+These extensions can also read configuration values before a connection is created.
+An example is the `proxy-extension` which adds a proxy configuration to the connector description.
+* *Pure functionality extensions*
++
+These extensions are used to add new functionality to the connector and do not need to manipulate the connector description.
+
+== How to use an extension?
+
+The usage of an extension is explained in the Connector SDK documentation.
+
+== How to create an extension?
+
+The creation of an extension depends on the type of extension you want to create.
+
+IMPORTANT: The extension object lifeecycle is managed by the connector SDK, so you do not need to create or destroy the extension object yourself.
+For each call of `Connector#createConnection` a new instance of the extension class is created.
+So an extension instance is bound to a single connection.
+
+=== How to create a connector description manipulating extension?
+
+. Create a new gradle module in the `extensions` directory.
+. Add the `connector-sdk:api` dependency to the `build.gradle.kts` file.
+. Create a new class that implements the `DescriptorExtension` interface.
+. Implement the `modifyDescription` methods to modify the connector description.
++
+TIP: You can either implement both methods or only the one that is needed for the connector type the extension supports
+. Implement the `readConfiguration` method if you want to read configuration values before a connection is created.
++
+TIP: This method is helpful to provide an instance of the extension class with the configuration values.
+. Implement additional methods that can be used by the connector to provide new functionality.
+. Register the extension.
+.. Create a file named `META-INF/services/io.transconnect.connector.api.extension.ConnectorExtension` in the `resources` directory of the module.
+.. Add the fully qualified name of the extension class to the file.
+
+It is also possible to create multiple extensions in a single module.
+
+=== How to create a pure functionality extension?
+
+. Create a new gradle module in the `extensions` directory.
+. Add the `connector-sdk:api` dependency to the `build.gradle.kts` file.
+. Create a new class that implements the `ConnectorExtension` interface.
+. Add methods that can be used by the connector to provide new functionality.
+. Register the extension.
+.. Create a file named `META-INF/services/io.transconnect.connector.api.extension.ConnectorExtension` in the `resources` directory of the module.
+.. Add the fully qualified name of the extension class to the file.
+
+== Best practices
+
+=== Naming conventions
+
+- Use a descriptive name for the extension that reflects its purpose.
+- Use the `Extension` suffix for the extension class name to indicate that it is an extension.
+- Use the

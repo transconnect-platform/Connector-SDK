@@ -32,6 +32,8 @@ public enum ValidatorType {
 
     /**
      * The configuration class associated with this validator type.
+     *
+     * @return the configuration class associated with this validator type
      */
     private final Class<? extends IValidatorTypeConfig> configClass;
 

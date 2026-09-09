@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ (c) Copyright 2026 SQL Projekt AG. All rights reserved.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://transconnect.io/connector/hello"
+           targetNamespace="http://transconnect.io/connector/hello"
+           elementFormDefault="qualified">
+
+    <xs:include
+            schemaLocation="../templates/interaction.xsd"/>
+
+    <xs:element name="name" substitutionGroup="input-payload" type="Name"/>
+    <xs:element name="greeting" substitutionGroup="output-payload" type="Greeting"/>
+
+    <xs:simpleType name="Name">
+        <xs:restriction base="xs:string"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="Greeting">
+        <xs:restriction base="xs:string"/>
+    </xs:simpleType>
+
+</xs:schema>

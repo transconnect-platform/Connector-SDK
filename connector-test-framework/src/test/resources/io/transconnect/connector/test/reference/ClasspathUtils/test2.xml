@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<message xmlns:test="http://transconnect.io/connector/test">
+    <test:configuration>
+        <test:property id="">value</test:property>
+    </test:configuration>
+    <input test:interaction="greet">
+        <name>Martin</name>
+        <language>french</language>
+    </input>
+    <output>
+        <greeting>Bonjour Martin</greeting>
+        <timestamp test:ignore="true"/>
+    </output>
+</message>

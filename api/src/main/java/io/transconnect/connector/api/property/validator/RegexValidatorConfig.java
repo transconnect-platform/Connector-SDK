@@ -15,6 +15,8 @@ public class RegexValidatorConfig implements IValidatorTypeConfig {
 
     /**
      * Regular expression pattern to validate against.
+     *
+     * @return regular expression pattern to validate against
      */
     private String pattern;
 }

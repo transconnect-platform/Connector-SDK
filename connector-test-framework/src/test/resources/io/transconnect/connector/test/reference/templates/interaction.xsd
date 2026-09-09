@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ (c) Copyright 2025 SQL Projekt AG. All rights reserved.
+  -->
+
+<!--
+  The XSD interaction schema has no namespace
+  so it can be included into another namespaced
+  schema and inherit its namespace.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb" jaxb:version="3.0" elementFormDefault="qualified">
+
+    <!--
+      The message schema is included.
+    -->
+    <xs:include schemaLocation="message.xsd" />
+
+    <!--
+      A connector interaction message can have a input and output element.
+    -->
+    <xs:element name="input-payload" abstract="true" />
+    <xs:element name="output-payload" abstract="true" />
+
+    <xs:element name="input" substitutionGroup="payload">
+
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:class name="InteractionInputElement"/>
+            </xs:appinfo>
+        </xs:annotation>
+
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="input-payload" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="output" substitutionGroup="payload">
+
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:class name="InteractionOutputElement"/>
+            </xs:appinfo>
+        </xs:annotation>
+
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="output-payload" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

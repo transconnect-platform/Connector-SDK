@@ -1,3 +1,39 @@
 = Kompatibilität
 
+Beim Deployment eines Connectors prüft TRANSCONNECT, ob dieser mit dem laufenden Server kompatibel ist.
+Benötigt der Connector eine neuere Connector SDK-API als der Server bereitstellt, weist der Server ihn bereits bei der Registrierung mit einer verständlichen Meldung ab, statt später mit einem kryptischen Fehler abzubrechen.
+
+Die Prüfung basiert auf der Connector SDK-API-Version, die der semantischen Versionierung folgt (`major.minor.patch`).
+
+== Kompatibilitätsregeln
+
+Für die API-Version, gegen die der Connector gebaut wurde (`C`), und die vom Server bereitgestellte Version (`S`):
+
+* *Kompatibel* – gleiche Major-Version und der Server ist gleich oder neuer (`S.minor` >= `C.minor`). Eine neuere Patch- oder Minor-Version auf dem Server ist immer kompatibel.
+* *Inkompatibel* – die Major-Versionen unterscheiden sich.
+* *Inkompatibel* – die Minor-Version des Servers ist älter als die des Connectors (`S.minor` < `C.minor`).
+
+== Benötigte API-Version deklarieren
+
+Ein Connector deklariert die API-Version, gegen die er gebaut wurde, über das Attribut `TC-Connector-API` in seinem WAR-Manifest (`META-INF/MANIFEST.MF`).
+Der Wert ist die Version von `io.transconnect.connector:api`, gegen die der Connector kompiliert.
+
+Fügen Sie das Attribut in der `war`-Task Ihrer `build.gradle.kts` hinzu und verwenden Sie dieselbe Version wie für die Connector SDK-API-Abhängigkeit:
+
+[source,kotlin]
+....
+dependencies {
+    providedCompile("io.transconnect.connector:api:<VERSION>")
+}
+
+tasks.war {
+    manifest {
+        attributes("TC-Connector-API" to "<VERSION>")
+    }
+}
+....
+
+NOTE: Deklariert ein Connector das Attribut nicht, registriert der Server ihn mit einer Warnung und überspringt die Kompatibilitätsprüfung, sodass bestehende Connectoren weiterhin funktionieren.
+Die Deklaration wird empfohlen, damit Deployment-Probleme mit einer verständlichen Meldung gemeldet werden.
+
 Die mit Ihrem TRANSCONNECT-Server kompatible Connector SDK-Version finden Sie im TRANSCONNECT Entwickler-Handbuch.

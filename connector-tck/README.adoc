@@ -1,0 +1,36 @@
+= Connector SDK TCK
+
+This module contains the Technology Compatibility Kit (TCK) for TRANSCONNECT Connectors.
+The TCK is a set of tests that verify the compliance of a connector implementation with the TRANSCONNECT Connector API specifications.
+It ensures that connectors behave as expected and adhere to the defined standards.
+The TCK is essential for maintaining the quality and reliability of connectors within the TRANSCONNECT ecosystem.
+
+== Usage
+To use the TCK, include this module in your connector project and run the tests provided in the TCK suite.
+Make sure to configure your build tool to include the TCK dependencies and execute the tests during your build process.
+
+[source,kotlin]
+----
+dependencies {
+    testImplementation("io.transconnect.connector:connector-tck:<VERSION>")
+}
+----
+
+Replace `<VERSION>` with the appropriate version of the TCK that matches your Connector SDK version.
+
+To execute the TCK Tests, place the following file in your test source directory (e.g., `src/test/java/<PACKAGE>/TckTestSuite.java`):
+
+[source,java,indent=0]
+----
+import org.junit.platform.suite.api.SelectPackages;
+import org.junit.platform.suite.api.Suite;
+import org.junit.platform.suite.api.SuiteDisplayName;
+
+@Suite
+@SuiteDisplayName("Connector SDK TCK Test Suite")
+@SelectPackages({"io.transconnect.connector.tck.producer", "io.transconnect.connector.tck.consumer"}) // // <1>
+public class TckTestSuite {}
+----
+<1> Select only the packages for producer and/or consumer if your connector implements one of the two.
+
+Then run the tests using Gradle or your IDE's test runner.

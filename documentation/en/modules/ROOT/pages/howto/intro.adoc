@@ -14,6 +14,9 @@ Each guide focuses on a specific feature or technique to help you implement effi
 
 |xref:howto/validator-config.adoc[Validator Configuration]
 |Explore TRANSCONNECT's validator system to ensure property values meet specific requirements using REGEX, RANGE, and DATETIME validators.
+
+|xref:howto/migration_custom_scheduled_tasks.adoc[Migration of Custom Scheduled Tasks]
+|Learn how to replace the no-longer-supported custom scheduled task API with process activities or a producer connector.
 |===
 
 == Getting Started

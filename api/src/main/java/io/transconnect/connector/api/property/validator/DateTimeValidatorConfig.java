@@ -15,6 +15,8 @@ public class DateTimeValidatorConfig implements IValidatorTypeConfig {
 
     /**
      * Date/time format pattern (e.g., "yyyy-MM-dd HH:mm:ss").
+     *
+     * @return date/time format pattern (e.g., "yyyy-MM-dd HH:mm:ss")
      */
     private String format;
 }

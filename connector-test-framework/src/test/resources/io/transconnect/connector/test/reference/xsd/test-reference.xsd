@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ (c) Copyright 2026 SQL Projekt AG. All rights reserved.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:test="http://transconnect.io/connector/test">
+
+    <xs:import namespace="http://transconnect.io/connector/test" schemaLocation="../../../../../../../../main/resources/io/transconnect/connector/test/reference/test.xsd"/>
+
+    <!-- root element -->
+    <xs:element name="message">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="test:configuration"/>
+                <xs:element name="input" minOccurs="0"/>
+                <xs:element name="output"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- input element type -->
+    <xs:element name="input">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+            </xs:sequence>
+            <xs:attribute name="interaction" type="xs:string" use="required"/>
+            <xs:attribute name="namespace" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- output element type -->
+    <xs:element name="output">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+            </xs:sequence>
+            <xs:attribute name="namespace" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

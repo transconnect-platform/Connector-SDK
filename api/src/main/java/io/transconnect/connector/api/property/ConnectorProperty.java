@@ -24,41 +24,65 @@ public class ConnectorProperty implements IConnectorProperty, Serializable {
 
     /**
      * id of the property.
+     *
+     * @param id id of the property
+     * @return id of the property
      */
     private String id;
 
     /**
      * localized display name of the property.
+     *
+     * @param displayName localized display name of the property
+     * @return localized display name of the property
      */
     private LocalizedText[] displayName;
 
     /**
      * localized description of the property.
+     *
+     * @param description localized description of the property
+     * @return localized description of the property
      */
     private LocalizedText[] description;
 
     /**
      * type of connector property.
+     *
+     * @param type type of connector property
+     * @return type of connector property
      */
     private ConnectorPropertyType type;
 
     /**
      * the default value of this property.
+     *
+     * @param defaultValue the default value of this property
+     * @return the default value of this property
      */
     private Serializable defaultValue;
 
     /**
      * flag indicating whether this property is required or not.
+     *
+     * @param required flag indicating whether this property is required or not
+     * @return flag indicating whether this property is required or not
      */
     private boolean required;
 
     /**
      * validator configuration to be used when validating this property.
+     *
+     * @param validator validator configuration to be used when validating this property
+     * @return validator configuration to be used when validating this property
      */
     private ValidatorConfig validator;
 
     /**
      * Dependencies that this property relies on for validation.
+     *
+     * @param dependsOn dependencies that this property relies on for validation
+     * @return dependencies that this property relies on for validation
      */
     private PropertyDependency[] dependsOn;
 }

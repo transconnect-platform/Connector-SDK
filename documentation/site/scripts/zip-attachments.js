@@ -1,42 +1,47 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const archiver = require('archiver');
+const fs = require("fs");
+const path = require("path");
+const archiver = require("archiver");
+const { resolveVersionDir } = require("../../scripts/resolve-version-dir");
 
 const config = {
-  languages: ['de', 'en'],
-  component: 'dev-doc',
-  version: '5.0.0',
-  attachmentFolder: 'tutorial-example'
+  languages: ["de", "en"],
+  component: "sdk-doc",
+  attachmentFolder: "tutorial-example",
 };
 
+function componentDir(language) {
+  return path.join("../public", language, config.component);
+}
+
 function createZip(language) {
+  const versionDir = resolveVersionDir(componentDir(language));
+  if (!versionDir) return Promise.resolve(false);
+
   const attachmentPath = path.join(
-    '../public',
-    language,
-    config.component,
-    config.version,
-    '_attachments',
-    config.attachmentFolder
+    componentDir(language),
+    versionDir,
+    "_attachments",
+    config.attachmentFolder,
   );
-  
+
   if (!fs.existsSync(attachmentPath)) {
     console.error(`❌ Attachment folder not found: ${attachmentPath}`);
     return Promise.resolve(false);
   }
-  
+
   const zipFileName = `${config.attachmentFolder}.zip`;
   const outputDir = path.dirname(attachmentPath);
   const zipPath = path.join(outputDir, zipFileName);
-  
+
   return new Promise((resolve) => {
     const output = fs.createWriteStream(zipPath);
-    const archive = archiver('zip', {
-      zlib: { level: 9 }
+    const archive = archiver("zip", {
+      zlib: { level: 9 },
     });
-    
-    output.on('close', () => {
+
+    output.on("close", () => {
       console.log(`✅ Created: ${zipPath} (${archive.pointer()} bytes)`);
 
       // Remove source files after successful ZIP creation
@@ -49,12 +54,12 @@ function createZip(language) {
 
       resolve(true);
     });
-    
-    archive.on('error', (err) => {
+
+    archive.on("error", (err) => {
       console.error(`❌ Failed to create zip for ${language}: ${err.message}`);
       resolve(false);
     });
-    
+
     archive.pipe(output);
     archive.directory(attachmentPath, config.attachmentFolder);
     archive.finalize();
@@ -62,26 +67,28 @@ function createZip(language) {
 }
 
 async function main() {
-  if (!fs.existsSync('../public')) {
-    console.error('❌ Build directory not found. Run the build process first.');
+  if (!fs.existsSync("../public")) {
+    console.error("❌ Build directory not found. Run the build process first.");
     process.exit(1);
   }
-  
-  console.log('Creating attachment zips...');
-  
+
+  console.log("Creating attachment zips...");
+
   let successCount = 0;
-  
+
   for (const language of config.languages) {
     const success = await createZip(language);
     if (success) {
       successCount++;
     }
   }
-  
-  console.log(`\nCompleted: ${successCount}/${config.languages.length} zips created`);
-  
+
+  console.log(
+    `\nCompleted: ${successCount}/${config.languages.length} zips created`,
+  );
+
   if (successCount === 0) {
-    console.error('❌ No zips were created successfully');
+    console.error("❌ No zips were created successfully");
     process.exit(1);
   }
 }

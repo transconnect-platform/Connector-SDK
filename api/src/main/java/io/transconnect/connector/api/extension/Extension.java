@@ -16,10 +16,11 @@ public @interface Extension {
 
     /**
      * The class of the extension.
-     * TODO pherklotz: This could be simplified. We could remove this
-     * annotation and use a list of extension classes directly. The
-     * current approach would allow us to define additional Extension
-     * parameter (e.g. a supported OAuth configuration, order of properties) in the future.
+     *
+     * <p>The indirection through this annotation instead of a plain list of extension classes leaves
+     * room for additional per-extension parameters, such as a supported OAuth configuration or the
+     * order of the injected properties.</p>
+     *
      * @return the class of the extension
      */
     Class<? extends ConnectorExtension> value();

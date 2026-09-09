@@ -16,22 +16,29 @@ public class RangeValidatorConfig implements IValidatorTypeConfig {
 
     /**
      * Minimum allowed value.
+     *
+     * @return minimum allowed value
      */
     private Long min;
 
     /**
      * Maximum allowed value.
+     *
+     * @return maximum allowed value
      */
     private Long max;
 
     /**
      * Multiple range validation support.
      * Each pair represents an inclusive range [min, max]
+     *
+     * @return multiple range validation support. Each pair represents an inclusive range [min, max]
      */
     private Map<Long, Long> ranges;
 
     /**
-     * Returns true if this property is configured toi use ranges.
+     * Returns true if this property is configured to use ranges.
+     *
      * @return true if using multiple ranges instead of single min/max
      */
     public boolean isUsingRanges() {

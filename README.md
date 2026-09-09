@@ -1,12 +1,14 @@
 # TRANSCONNECT Connector SDK
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.transconnect.connector/api)](https://central.sonatype.com/artifact/io.transconnect.connector/api)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 [![Java Version](https://img.shields.io/badge/Java-17%2B-blue)](https://openjdk.org/)
 
 > A powerful and extensible SDK for building custom connectors for the TRANSCONNECT integration platform.
 
-The TRANSCONNECT Connector SDK enables developers to create custom integration connectors that seamlessly connect external systems with the TRANSCONNECT platform. Build producers to send data into TRANSCONNECT or consumers to process outbound messages with a flexible, well-documented API.
+The TRANSCONNECT Connector SDK enables developers to create custom integration connectors that seamlessly connect
+external systems with the TRANSCONNECT platform. Build producers to send data into TRANSCONNECT or consumers to process
+outbound messages with a flexible, well-documented API.
 
 ## Features
 
@@ -14,7 +16,8 @@ The TRANSCONNECT Connector SDK enables developers to create custom integration c
 - **Consumer Connectors**: Build connectors that receive and process messages from TRANSCONNECT
 - **Extensible Architecture**: Plugin-based design with support for custom extensions
 - **Type-Safe API**: Strongly-typed Java interfaces with comprehensive validation
-- **Testing Framework**: Integrated TCK (Technology Compatibility Kit) for connector validation
+- **Reference Test Framework**: Validate connectors against XML-based reference test cases
+- **TCK**: Technology Compatibility Kit enforcing API compliance
 
 ## Table of Contents
 
@@ -48,6 +51,11 @@ Add the following to your `build.gradle.kts`:
 ```kotlin
 dependencies {
     implementation("io.transconnect.connector:api:${version}")
+
+    // optional: validate your connector against reference test cases
+    testImplementation("io.transconnect.connector:connector-test-framework:${version}")
+    // optional: validate API compliance
+    testImplementation("io.transconnect.connector:connector-tck:${version}")
 }
 ```
 
@@ -61,49 +69,159 @@ dependencies {
 }
 ```
 
+### Extensions
+
+Extensions are published separately under the `io.transconnect.connector.extensions` group:
+
+| Artifact                   | Purpose                                                          |
+|----------------------------|------------------------------------------------------------------|
+| `jaxb`                     | XML marshalling/unmarshalling with schema validation             |
+| `proxy-properties`         | Auto-injects proxy configuration properties                      |
+| `yaml-descriptor`          | Define connector descriptors in YAML instead of Java             |
+| `oauth2-properties`        | OAuth2 client-credentials configuration properties               |
+| `ms-oauth2-token-provider` | Microsoft OAuth2 token provider (MSAL4J)                         |
+
 ## Quick Start
 
 ### Creating a Producer Connector
 
-A producer connector sends data into TRANSCONNECT:
+A producer connector generates messages that flow into TRANSCONNECT. The connector describes itself and creates
+connections; the connection produces messages and hands them to the runtime through a
+`ProducerConnectorListener`:
 
 ```java
-public class MyProducerConnector implements ProducerConnector {
+public class DateTimeConnector implements ProducerConnector {
+
     @Override
-    public void initialize(ConnectorContext context) {
-        // Initialize your connector
+    public ProducerConnectorDescriptor getDescription() {
+        CommonConnectorDescriptor common = CommonConnectorDescriptor.builder()
+                .type(URI.create("urn:example:connector:datetime-producer"))
+                .version("1.0.0")
+                .vendor("Example Corp")
+                .displayName(new LocalizedText[] {new LocalizedText(Locale.ENGLISH, "DateTime Producer")})
+                .build();
+
+        return ProducerConnectorDescriptor.builder()
+                .common(common)
+                .producedMessageXsd(URI.create("/com/example/connector/produced.xsd"))
+                .build();
     }
 
     @Override
-    public ProducerResult produce() {
-        // Fetch data from your external system
-        String data = fetchDataFromExternalSystem();
+    public ProducerConnection createConnection(Context context) {
+        return new DateTimeConnection(context);
+    }
+}
+```
 
-        return ProducerResult.success(data);
+```java
+public class DateTimeConnection implements ProducerConnection {
+
+    private ProducerConnectorListener listener;
+
+    @Override
+    public void connect(MessageFactory<WritableMessage> factory, ProducerConnectorListener listener) {
+        this.listener = listener;
+        // start producing, then signal that the connection is up
+        listener.onConnect();
+    }
+
+    private void produce(MessageFactory<WritableMessage> factory) {
+        WritableMessage message = factory.createMessage();
+        try (var out = message.getBodyOutputStream()) {
+            out.write("<ROOT><DATETIME>%s</DATETIME></ROOT>"
+                    .formatted(LocalDateTime.now())
+                    .getBytes(StandardCharsets.UTF_8));
+            listener.onMessage(message);
+        } catch (IOException e) {
+            listener.onError(e);
+        }
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
+
+    @Override
+    public void close() {
+        listener.onDisconnect();
     }
 }
 ```
 
 ### Creating a Consumer Connector
 
-A consumer connector processes messages from TRANSCONNECT:
+A consumer connector processes messages coming from TRANSCONNECT. Its descriptor declares one or more
+`Interaction`s, and the connection executes the interaction identified by its ID:
 
 ```java
-public class MyConsumerConnector implements ConsumerConnector {
+public class CountCharactersConnector implements ConsumerConnector {
+
     @Override
-    public void initialize(ConnectorContext context) {
-        // Initialize your connector
+    public ConsumerConnectorDescriptor getDescription() {
+        CommonConnectorDescriptor common = CommonConnectorDescriptor.builder()
+                .type(URI.create("urn:example:connector:count-characters-consumer"))
+                .version("1.0.0")
+                .vendor("Example Corp")
+                .displayName(new LocalizedText[] {new LocalizedText(Locale.ENGLISH, "Count Characters")})
+                .build();
+
+        Interaction countCharacters = Interaction.builder()
+                .id(URI.create("countCharacters"))
+                .inMessageXsd(URI.create("/com/example/connector/in.xsd"))
+                .outMessageXsd(URI.create("/com/example/connector/out.xsd"))
+                .build();
+
+        return ConsumerConnectorDescriptor.builder()
+                .common(common)
+                .interactions(new Interaction[] {countCharacters})
+                .build();
     }
 
     @Override
-    public ConsumerResult consume(Message message) {
-        // Process the message
-        processMessage(message);
-
-        return ConsumerResult.success();
+    public ConsumerConnection createConnection(Context context) {
+        return new CountCharactersConnection(context);
     }
 }
 ```
+
+```java
+public class CountCharactersConnection implements ConsumerConnection {
+
+    @Override
+    public void connect() {
+        // no connection setup needed
+    }
+
+    @Override
+    public void execute(URI interactionId, Message input, WritableMessage output)
+            throws TransconnectConnectorException {
+        if (!"countCharacters".equals(interactionId.toString())) {
+            throw new TransconnectConnectorException("Unknown interaction: '%s'".formatted(interactionId));
+        }
+        try (var out = output.getBodyOutputStream()) {
+            long count = countCharacters(input.getXmlBody());
+            out.write("<ROOT><COUNT>%d</COUNT></ROOT>".formatted(count).getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new TransconnectConnectorException("Error processing message", e);
+        }
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
+
+    @Override
+    public void close() {
+        // no resources to release
+    }
+}
+```
+
+A complete, buildable version of both connectors lives in
+[`documentation/tutorial-example`](documentation/tutorial-example/).
 
 ## Documentation
 
@@ -134,7 +252,10 @@ The built documentation will be available in the `documentation/site/` directory
 ```
 transconnect-connector-sdk/
 ├── api/                          # Core SDK API
-└── documentation/                # Antora documentation
+├── connector-test-framework/     # XML-based reference testing framework
+├── connector-tck/                # Technology Compatibility Kit
+├── extensions/                   # Optional add-ons (jaxb, proxy, yaml, oauth2, ...)
+└── documentation/                # Antora documentation and tutorial example
 ```
 
 ## Building from Source
@@ -200,4 +321,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) f
 ---
 
 **Built with ❤️ by the TRANSCONNECT Team**
-

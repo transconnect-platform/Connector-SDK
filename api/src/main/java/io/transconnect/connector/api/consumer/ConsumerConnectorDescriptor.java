@@ -25,17 +25,26 @@ public class ConsumerConnectorDescriptor implements ConnectorDescriptor {
 
     /**
      * Common connector properties.
+     *
+     * @param common common connector properties
+     * @return common connector properties
      */
     private CommonConnectorDescriptor common;
 
     /**
      * Array of property specifications to configure the Connector.
+     *
+     * @param properties array of property specifications to configure the Connector
+     * @return array of property specifications to configure the Connector
      */
     @Builder.Default
     private IConnectorProperty[] properties = new IConnectorProperty[0];
 
     /**
      * Array of Interactions that can be executed by the Connector.
+     *
+     * @param interactions array of Interactions that can be executed by the Connector
+     * @return array of Interactions that can be executed by the Connector
      */
     @Builder.Default
     private Interaction[] interactions = new Interaction[0];

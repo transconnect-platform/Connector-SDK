@@ -1,0 +1,114 @@
+specVersion: 1.0.0
+common:
+  type: "urn:transconnect:connector:sample"
+  version: 1.0.0
+  vendor: SQL Projekt AG
+  displayName:
+    - locale: de
+      message: Beispiel Connector
+    - locale: en
+      message: Sample Connector
+  description:
+    - locale: de
+      message: Beschreibung
+    - locale: en
+      message: Description
+  labels: [ "sample", "greeting" ]
+properties:
+  - id: sample-property
+    displayName:
+      - locale: de
+        message: Beispiel Eigenschaft
+      - locale: en
+        message: Sample Property
+    description:
+      - locale: de
+        message: Dies ist eine Beispiel Eigenschaft
+      - locale: en
+        message: This is a Sample Property
+    type: TEXT
+    defaultValue: 123
+    required: false
+    validator:
+      type: REGEX
+      config:
+        pattern: "[a-zA-Z0-9]+"  # Only alphanumeric characters allowed
+    dependsOn:
+      - operation: MATCHES
+        value: "[0-9]+"  # If numeric only
+        constraints:
+          - propertyId: "language"
+            operation: EQUALS
+            value: "German"
+      - operation: MATCHES
+        value: "[a-zA-Z]+"  # If text only
+        constraints:
+          - propertyId: "language"
+            operation: NOT_EQUALS
+            value: "German"
+  - id: language
+    displayName:
+      - locale: de
+        message: Sprache
+      - locale: en
+        message: Language
+    description:
+      - locale: de
+        message: Definierte Sprache
+      - locale: en
+        message: Defined Language
+    type: SELECT
+    entries:
+      - id: "German"
+        # Note: displayName is not supported in the TC-Manager
+        # Structure was introduced for future use!
+        displayName:
+          - locale: de
+            message: "Deutsch"
+          - locale: en
+            message: "German"
+      - id: "English"
+        # Note: displayName is not supported in the TC-Manager
+        # Structure was introduced for future use!
+        displayName:
+          - locale: de
+            message: "Englisch"
+          - locale: en
+            message: "English"
+      - id: "French"
+        # Note: displayName is not supported in the TC-Manager
+        # Structure was introduced for future use!
+        displayName:
+          - locale: de
+            message: "Französisch"
+          - locale: en
+            message: "French"
+    defaultValue: "German"
+    required: false
+interactions:
+  - id: "urn:transconnect:connector:sample:hello"
+    displayName:
+      - locale: de
+        message: Hallo
+      - locale: en
+        message: Hello
+    description:
+      - locale: de
+        message: Begrüßt den Nutzer mit Hallo
+      - locale: en
+        message: Greet the user with Hello
+    inMessageXsd: in.xsd
+    outMessageXsd: out.xsd
+  - id: "urn:transconnect:connector:sample:goodbye"
+    displayName:
+      - locale: de
+        message: Tschüss
+      - locale: en
+        message: Goodbye
+    description:
+      - locale: de
+        message: Verabschieded den Nutzer mit Tschüss
+      - locale: en
+        message: Greet the user with Goodbye
+    inMessageXsd: in.xsd
+    outMessageXsd: out.xsd

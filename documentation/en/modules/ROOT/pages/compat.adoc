@@ -1,3 +1,39 @@
 = Compatibility
 
+When a connector is deployed, TRANSCONNECT checks whether it is compatible with the running server.
+If the connector requires a newer Connector SDK API than the server provides, the server rejects it during registration with a clear message instead of failing later with a cryptic error.
+
+The check is based on the Connector SDK API version, which follows semantic versioning (`major.minor.patch`).
+
+== Compatibility rules
+
+Given the API version the connector was built against (`C`) and the version the server provides (`S`):
+
+* *Compatible* – same major version and the server is the same or newer (`S.minor` >= `C.minor`). A newer patch or minor version on the server is always compatible.
+* *Incompatible* – the major versions differ.
+* *Incompatible* – the server's minor version is older than the connector's (`S.minor` < `C.minor`).
+
+== Declaring the required API version
+
+A connector declares the API version it was built against through the `TC-Connector-API` attribute in its WAR manifest (`META-INF/MANIFEST.MF`).
+The value is the `io.transconnect.connector:api` version the connector compiles against.
+
+Add the attribute to the `war` task in your `build.gradle.kts`, using the same version as the Connector SDK API dependency:
+
+[source,kotlin]
+....
+dependencies {
+    providedCompile("io.transconnect.connector:api:<VERSION>")
+}
+
+tasks.war {
+    manifest {
+        attributes("TC-Connector-API" to "<VERSION>")
+    }
+}
+....
+
+NOTE: If a connector does not declare the attribute, the server registers it with a warning and skips the compatibility check, so existing connectors keep working.
+Declaring it is recommended so that deployment problems are reported with a meaningful message.
+
 For the Connector SDK version compatible with your TRANSCONNECT server, see the TRANSCONNECT Developer Manual.

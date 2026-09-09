@@ -23,16 +23,25 @@ public class PropertyConstraint implements Serializable {
 
     /**
      * The ID of the property to which the constraint applies.
+     *
+     * @param propertyId the ID of the property to which the constraint applies
+     * @return the ID of the property to which the constraint applies
      */
     private String propertyId;
 
     /**
      * The operation defining the constraint logic.
+     *
+     * @param operation the operation defining the constraint logic
+     * @return the operation defining the constraint logic
      */
     private ConnectorPropertyConstraintOperation operation;
 
     /**
      * The target value for the constraint.
+     *
+     * @param value the target value for the constraint
+     * @return the target value for the constraint
      */
     private Serializable value;
 }

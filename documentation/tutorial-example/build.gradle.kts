@@ -40,6 +40,14 @@ tasks.test {
     useJUnitPlatform()
 }
 
+// Declare the Connector SDK API version so the server can perform the
+// compatibility check when the connector is deployed.
+tasks.war {
+    manifest {
+        attributes("TC-Connector-API" to connectorSdkVersion)
+    }
+}
+
 // Configure XJC to generate Java classes from XSD files
 xjc {
     xsdDir.set(file("$projectDir/src/main/resources/com/example/connector"))

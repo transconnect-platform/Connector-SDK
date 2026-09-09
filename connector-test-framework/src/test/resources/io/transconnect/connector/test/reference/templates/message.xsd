@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ (c) Copyright 2025 SQL Projekt AG. All rights reserved.
+  -->
+
+<!--
+  The XSD message schema has no namespace
+  so it can be included into another namespaced
+  schema and inherit its namespace.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb" jaxb:version="3.0" elementFormDefault="qualified">
+
+    <xs:annotation>
+        <xs:documentation xml:lang="en"> This schema defines a simple message structure without its own
+            namespace. It can be included into another schema that has a target namespace and will then
+            inherit that namespace. <p><strong>Purpose:</strong> A generic message envelope with an
+                abstract payload element, which must be concretized by domain-specific schemas via
+                substitution groups.</p>
+
+            <p><strong>Version:</strong>1.0.0</p>
+        </xs:documentation>
+    </xs:annotation>
+
+    <!--
+      Abstract payload element used in messages.
+      It must be replaced by concrete elements via substitution groups.
+    -->
+    <xs:element name="payload" abstract="true">
+        <xs:annotation>
+            <xs:documentation xml:lang="en"> Abstract placeholder element for message payloads. It is
+                never instantiated directly, but replaced by concrete elements that declare <code>
+                    substitutionGroup="payload"</code>. <p><strong>Usage:</strong> Other schemas define concrete
+                    payloads and assign them to this substitution group.</p>
+
+                <p>
+                    <strong>Example (definition in another schema):</strong>
+                </p>
+                <![CDATA[
+          <xs:element name="orderCreated" substitutionGroup="payload">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="orderId" type="xs:string"/>
+                <xs:element name="createdAt" type="xs:dateTime"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        ]]>
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <!--
+      The Root element "message" accepts one payload element via
+      substitution group.
+    -->
+    <xs:element name="message">
+
+        <xs:annotation>
+
+            <xs:appinfo>
+                <jaxb:class name="MessageElement"/>
+            </xs:appinfo>
+
+            <xs:documentation xml:lang="en"> Root element of a message. It contains exactly one payload
+                element, which must be a member of the substitution group of the abstract <code>payload</code>
+                element. <p><strong>Cardinality:</strong> exactly 1 payload (minOccurs=1, maxOccurs=1).</p>
+
+                <p>
+                    <strong>Example instance:</strong>
+                </p>
+                <![CDATA[
+          <message>
+            <orderCreated>
+              <orderId>O-12345</orderId>
+              <createdAt>2025-08-29T10:15:00Z</createdAt>
+            </orderCreated>
+          </message>
+        ]]>
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="payload">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en"> Placeholder for a concrete payload element that belongs
+                            to the substitution group of <code>payload</code> (e.g. <code>orderCreated</code>, <code>
+                                invoice</code>, …). </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

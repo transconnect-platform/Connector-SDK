@@ -1,0 +1,15 @@
+= Migration von benutzerdefinierten zeitgesteuerten Aufgaben
+
+Die API zur Entwicklung von benutzerdefinierten zeitgesteuerten Aufgaben wird mit TRANSCONNECT 4.3.0 nicht mehr unterstützt. Stattdessen wird empfohlen diese Funktionalität nun anders abzubilden.
+
+Hierfür stehen die folgenden Möglichkeiten zur Verfügung:
+
+== Prozessaktivitäten
+
+Im Lieferumfang von TRANSCONNECT befindet sich die zeitgesteuerte Aufgabe `Nachricht mit Zeitstempel erstellen`. Diese kann zunächst verwendet werden um zeitgesteuert eine TRANSCONNECT Nachricht zu generieren. Diese Nachricht kann dann in einem TRANSCONNECT Prozess verwendet werden, der die Funktionalitäten der benutzerdefinierten zeitgesteuerten Aufgabe mittels der üblichen Prozessaktivitäten abbildet.
+
+== Produzierende Connectoren
+
+Alternativ kann auch ein produzierender Connector verwendet werden, um zeitgesteuert Nachrichten zu generieren. Ein produzierender Connector ist eine Java-Klasse, die Nachrichten an den TRANSCONNECT Kern versendet.
+
+Eine ausführliche Beschreibung (inklusive Beispiel) zur Entwicklung eines produzierenden Connectors findet sich im xref:producer/intro.adoc[Producer-Connector-Tutorial].
