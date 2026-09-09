@@ -25,12 +25,18 @@ public class ValidatorConfig implements Serializable {
 
     /**
      * type of validator.
+     *
+     * @param type type of validator
+     * @return type of validator
      */
     @NonNull
     private ValidatorType type;
 
     /**
      * configuration for this validator.
+     *
+     * @param config configuration for this validator
+     * @return configuration for this validator
      */
     private IValidatorTypeConfig config;
 

@@ -2,9 +2,10 @@ antora:
   extensions:
     - require: "@antora/lunr-extension"
     - require: "@antora/collector-extension"
+    - require: "./scripts/set-sdk-version-extension"
 site:
   title: Connector SDK
-  start_page: connector-sdk-doc::introduction.adoc
+  start_page: sdk-doc::introduction.adoc
 runtime:
   log:
     failure_level: fatal

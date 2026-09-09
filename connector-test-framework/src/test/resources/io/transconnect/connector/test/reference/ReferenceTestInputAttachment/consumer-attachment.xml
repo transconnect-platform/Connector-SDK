@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message
+        xmlns:test="http://transconnect.io/connector/test"
+        xmlns="http://transconnect.io/connector/hello"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+                                http://transconnect.io/connector/hello classpath:io/transconnect/connector/test/reference/xsd/hello.xsd">
+    <test:configuration>
+        <test:property id="uppercase">true</test:property>
+        <test:property id="retryCount">2</test:property>
+        <test:property id="language">German</test:property>
+        <test:property id="resultInAttachment">false</test:property>
+    </test:configuration>
+    <input test:interaction="hello">
+        <test:attachment id="additionalText" file="additional.txt"/>
+        <name>Tütütü</name>
+    </input>
+    <output>
+        <greeting>HALLO TÜTÜTÜ</greeting>
+    </output>
+</message>

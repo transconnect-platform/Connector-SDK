@@ -25,11 +25,17 @@ public class LocalizedText implements Serializable {
 
     /**
      * the language of the text.
+     *
+     * @param locale the language of the text
+     * @return the language of the text
      */
     private Locale locale;
 
     /**
      * the text.
+     *
+     * @param message the text
+     * @return the text
      */
     private String message;
 

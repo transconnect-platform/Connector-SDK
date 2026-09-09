@@ -32,11 +32,19 @@ val copyJavadocToAntora by tasks.registering {
 }
 
 dependencies {
-    testImplementation(libs.testng)
     testImplementation("org.mockito:mockito-core:5.21.0")
     testImplementation(libs.junit)
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes(
+            "Implementation-Title" to "TRANSCONNECT Connector API",
+            "TC-Connector-API" to project.provider { project.version.toString() },
+        )
+    }
 }

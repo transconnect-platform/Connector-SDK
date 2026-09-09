@@ -15,4 +15,12 @@ dependencyResolutionManagement {
     }
 }
 
-include("api")
+include(
+    "api",
+    "connector-test-framework",
+    "extensions:proxy-properties",
+    "extensions:yaml-descriptor",
+    "extensions:jaxb",
+    "extensions:oauth2-properties",
+    "extensions:ms-oauth2-token-provider",
+    "connector-tck")

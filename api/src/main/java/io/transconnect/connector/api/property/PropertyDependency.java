@@ -23,16 +23,25 @@ public class PropertyDependency implements Serializable {
 
     /**
      * The operation defining the dependency logic.
+     *
+     * @param operation the operation defining the dependency logic
+     * @return the operation defining the dependency logic
      */
     private ConnectorPropertyConstraintOperation operation;
 
     /**
      * The value associated with the dependency.
+     *
+     * @param value the value associated with the dependency
+     * @return the value associated with the dependency
      */
     private Serializable value;
 
     /**
      * An array of constraints applicable to this dependency.
+     *
+     * @param constraints an array of constraints applicable to this dependency
+     * @return an array of constraints applicable to this dependency
      */
     private PropertyConstraint[] constraints;
 }

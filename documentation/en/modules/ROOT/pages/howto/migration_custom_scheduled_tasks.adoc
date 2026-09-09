@@ -1,0 +1,15 @@
+= Migration of Custom Scheduled Tasks
+
+The API for developing custom scheduled tasks is no longer supported as of TRANSCONNECT 4.3.0. Instead, it is recommended to implement this functionality in a different way.
+
+The following options are available for this purpose:
+
+== Process Activities
+
+TRANSCONNECT includes the scheduled task `Create Message with Timestamp`. This can initially be used to generate a TRANSCONNECT message on a schedule. This message can then be used in a TRANSCONNECT process that implements the functionalities of the custom scheduled task using the usual process activities.
+
+== Producer Connectors
+
+Alternatively, a producer connector can be used to generate messages on a schedule. A producer connector is a Java class that sends messages to the TRANSCONNECT core.
+
+A detailed description (including an example) for developing a producer connector can be found in the xref:producer/intro.adoc[Producer Connector tutorial].

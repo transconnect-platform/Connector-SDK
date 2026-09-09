@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:test="http://transconnect.io/connector/test"
+           targetNamespace="http://transconnect.io/connector/test"
+           elementFormDefault="qualified">
+
+    <!-- configuration -->
+    <xs:element name="configuration">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="test:property" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- property -->
+    <xs:element name="property">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="id" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- attachment reference: attaches the given file to the message under the given id -->
+    <xs:element name="attachment">
+        <xs:complexType>
+            <xs:attribute name="id" type="xs:string" use="required"/>
+            <xs:attribute name="file" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- test attribute -->
+    <xs:attribute name="interaction" type="xs:string"/>
+    <xs:attribute name="ignore" type="xs:string"/>
+</xs:schema>

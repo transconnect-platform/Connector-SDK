@@ -22,11 +22,17 @@ public class PropertyValueContext implements Serializable {
 
     /**
      * An array of all properties within the current context.
+     *
+     * @param properties an array of all properties within the current context
+     * @return an array of all properties within the current context
      */
     private IConnectorProperty[] properties;
 
     /**
      * The property currently being operated on or in focus.
+     *
+     * @param currentProperty the property currently being operated on or in focus
+     * @return the property currently being operated on or in focus
      */
     private IConnectorProperty currentProperty;
 }

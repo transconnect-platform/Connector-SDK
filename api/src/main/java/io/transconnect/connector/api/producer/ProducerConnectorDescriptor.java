@@ -25,11 +25,17 @@ public class ProducerConnectorDescriptor implements ConnectorDescriptor {
 
     /**
      * Common connector properties, like name and version.
+     *
+     * @param common common connector properties, like name and version
+     * @return common connector properties, like name and version
      */
     private CommonConnectorDescriptor common;
 
     /**
      * Array of property specifications to configure the Connector.
+     *
+     * @param properties array of property specifications to configure the Connector
+     * @return array of property specifications to configure the Connector
      */
     @Builder.Default
     private IConnectorProperty[] properties = new IConnectorProperty[0];
@@ -37,6 +43,9 @@ public class ProducerConnectorDescriptor implements ConnectorDescriptor {
     /**
      * The URI that can be used to load the XSD resource from the classpath that describes the produced message. The
      * produced message is the message that the producer connector produces.
+     *
+     * @param producedMessageXsd the URI of the XSD resource describing the produced message
+     * @return the URI of the XSD resource describing the produced message
      */
     private URI producedMessageXsd;
 
@@ -44,6 +53,10 @@ public class ProducerConnectorDescriptor implements ConnectorDescriptor {
      * The URI that can be used to load the XSD resource from the classpath that describes the result message. The
      * result message is the message that the producer connector expects get back from TRANSCONNECT for every message
      * that it had produced. Can be null if no result message is expected or if the connector works synchronously only.
+     *
+     * @param resultMessageXsd the URI of the XSD resource describing the result message, or null if no result
+     * message is expected
+     * @return the URI of the XSD resource describing the result message, or null if no result message is expected
      */
     private URI resultMessageXsd;
 }

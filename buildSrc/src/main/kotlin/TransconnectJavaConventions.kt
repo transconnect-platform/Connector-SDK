@@ -9,6 +9,8 @@ import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import java.nio.charset.StandardCharsets
 
 /**
@@ -17,6 +19,7 @@ import java.nio.charset.StandardCharsets
  * - Java toolchain configuration (Java 17)
  * - Testing framework configuration (TestNG/JUnit)
  * - Checkstyle configuration
+ * - JavaDoc configuration
  * - JaCoCo coverage configuration
  * - Spotless code formatting
  * - Reproducible build settings
@@ -42,6 +45,9 @@ class TransconnectJavaConventions : Plugin<Project> {
         // Configure Checkstyle
         configureCheckstyle(project)
 
+        // Configure JavaDoc
+        configureJavadoc(project)
+
         // Configure JaCoCo
         configureJacoco(project)
 
@@ -61,8 +67,10 @@ class TransconnectJavaConventions : Plugin<Project> {
     }
 
     private fun configureTesting(project: Project) {
-        // Configure test framework based on dependencies
-        // TestNG projects: api, war-connector-bridge, extensions/yaml-descriptor, extensions/proxy-properties
+        // Configure test framework based on dependencies: a module gets TestNG when it
+        // declares the testng dependency, and JUnit otherwise. A module that declares
+        // testng without using it would silently run no tests at all.
+        // TestNG projects: war-connector-bridge, extensions/yaml-descriptor, extensions/proxy-properties
         // JUnit projects: all others
         val hasTestNG = project.configurations.getByName("testImplementation").allDependencies.any {
             it.name == "testng"
@@ -97,8 +105,28 @@ class TransconnectJavaConventions : Plugin<Project> {
                 xml.required = false
                 html.required = true
             }
-            include("src/main/java/**/*.java")
-            exclude("generated/**/*.java")
+            // The patterns are matched against the paths relative to the source set
+            // directories, so "src/main/java/**" would never match anything.
+            include("**/*.java")
+            exclude("**/generated/**/*.java")
+            // The rule set describes the published API (JavaDoc, naming). Test sources
+            // deliberately use behaviour-describing method names and carry no JavaDoc,
+            // so only the main source set is checked.
+            enabled = name == "checkstyleMain"
+        }
+    }
+
+    private fun configureJavadoc(project: Project) {
+        project.tasks.withType<Javadoc>().configureEach {
+            (options as StandardJavadocDocletOptions).apply {
+                encoding = StandardCharsets.UTF_8.name()
+                // Report broken references, malformed HTML and bad tag syntax as errors, but not
+                // missing comments: JavaDoc runs on the delombok output, where the generated
+                // builders, constructors and equals helpers carry no comment and cannot get one.
+                // Missing JavaDoc on hand-written code is checked by Checkstyle on the real sources.
+                addStringOption("Xdoclint:all,-missing", "-quiet")
+                addBooleanOption("Werror", true)
+            }
         }
     }
 

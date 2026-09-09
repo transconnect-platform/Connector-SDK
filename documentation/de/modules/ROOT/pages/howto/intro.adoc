@@ -15,6 +15,9 @@ Jede Anleitung konzentriert sich auf eine bestimmte Funktion oder Technik, um Ih
 |xref:howto/validator-config.adoc[Validator-Konfiguration]
 |Entdecken Sie das Validator-System von TRANSCONNECT, um sicherzustellen, dass Eigenschaftswerte bestimmte Anforderungen erfüllen, mithilfe von REGEX, RANGE und DATETIME Validatoren (Validator).
 
+|xref:howto/migration_custom_scheduled_tasks.adoc[Migration von benutzerdefinierten zeitgesteuerten Aufgaben]
+|Erfahren Sie, wie Sie die nicht mehr unterstützte API für zeitgesteuerte Aufgaben durch Prozessaktivitäten oder einen produzierenden Connector ersetzen.
+
 |===
 
 == Erste Schritte
