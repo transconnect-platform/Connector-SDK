@@ -58,7 +58,7 @@ In diesem Leitfaden erfahren Sie, wie Sie:
 * Ihren Connector in einer TRANSCONNECT-Umgebung bereitstellen
 * Die Architektur des Connector SDK verstehen
 
-Eine detaillierte API-Dokumentation finden Sie unter link:{attachmentsdir}/javadoc/index.html[Connector SDK API JavaDoc^].
+Eine detaillierte API-Dokumentation finden Sie unter xref:attachment$javadoc/index.html[Connector SDK API JavaDoc].
 
 [#download-example-project]
 == Beispielprojekt herunterladen
