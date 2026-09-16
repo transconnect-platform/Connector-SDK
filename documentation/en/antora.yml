@@ -1,11 +1,14 @@
 # This is part of a distributed component version. It therefore has only a reduced set of properties.
 # The rest of the properties is defined in the frontend repository.
 # See https://docs.antora.org/antora/latest/distributed-component-version/ for more information
-name: dev-doc
-version: 5.0.0
+name: sdk-doc
+title: Connector SDK
+# version is set to the SDK version at build time by
+# documentation/scripts/set-sdk-version-extension.js;
+# "~" (unversioned) is the fallback when that doesn't run
+version: ~
 start_page: introduction.adoc
 nav:
-  - modules/ROOT/connector-sdk-nav.adoc
   - modules/ROOT/nav.adoc
 asciidoc:
   attributes:

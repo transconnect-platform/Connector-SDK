@@ -58,7 +58,7 @@ In this guide, you will learn how to:
 * Deploy your connector to a TRANSCONNECT environment
 * Understand the Connector SDK architecture
 
-For detailed API documentation, see the link:{attachmentsdir}/javadoc/index.html[Connector SDK API JavaDoc^].
+For detailed API documentation, see the xref:attachment$javadoc/index.html[Connector SDK API JavaDoc].
 
 [#download-example-project]
 == Download Example Project
