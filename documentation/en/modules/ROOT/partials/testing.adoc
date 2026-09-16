@@ -93,13 +93,253 @@ dependencies {
 
 `MockContext`:: is a mock implementation of the `Context` interface. It can be used to create a context that is then used to create a connector.
 
-`MockConfiguration`:: is a mock implementation of the `Configuration` interface. It can be used to create a connector configuration that is then used to create a `Context`.
+`MockConfig`:: is a mock implementation of the `Configuration` interface. It can be used to create a connector configuration that is then used to create a `Context`.
 
 `MockMessage`:: is a mock implementation of the `Message` interface. It can be used to create a message that is then used as input message for the connector during the execution of an interaction.
 
 `MockWritableMessage`:: is a mock implementation of the `WritableMessage` interface. It can be used to create a writable message that is then filled by the connector during the execution of an interaction. After test execution the content of this message can be checked against an expected result message.
 
 `MessageUtils`:: contains utility methods that should simplify message handling in test code.
+
+== Reference Tests
+
+Describing test cases as _reference files_ is an alternative to classic Java integration tests. Instead of Java code, a reference file contains the connector configuration, the input message and the expected result message as XML. The connector test framework (`io.transconnect.connector:connector-test-framework`) loads the connector, runs it against that file and compares the result. Adding a new test case then just means adding a file, rather than writing code.
+
+=== Setup
+
+Before reference tests can be written, the project needs some setup: add the dependency once, then for each connector to test, register it and create a `@ReferenceTest` method that references it via `consumer` or `producer`.
+
+Add the dependency to the `build.gradle.kts` file:
+
+[source,gradle]
+....
+dependencies {
+    testImplementation("io.transconnect.connector:connector-test-framework:1.1.1")
+}
+....
+
+You can find the latest version on https://central.sonatype.com/artifact/io.transconnect.connector/connector-test-framework[Maven Central].
+
+The connector is loaded via the `ServiceLoader`, so it must be registered on the test classpath. Create a file named after the connector interface. It contains the connector's fully qualified class name:
+
+`src/test/resources/META-INF/services/io.transconnect.connector.api.consumer.ConsumerConnector`
+
+[source]
+....
+com.example.connector.consumer.CountCharactersConnector
+....
+
+For producer connectors the file is named `io.transconnect.connector.api.producer.ProducerConnector`. Without this entry the test fails with `Could not load consumer connector` / `Could not load producer connector`.
+
+For each connector to test, also create a test method annotated with `@ReferenceTest` that references it via `consumer` or `producer`. The annotation turns the method into a JUnit 5 parameterized test; its `ReferenceTestProvider` collects the reference files and creates one test case per file.
+
+[source,java]
+....
+@ReferenceTest(
+        path = "com/example/connector/reference/consumer/",
+        ignoreNamespaces = true,
+        compareAttachments = false,
+        consumer = CountCharactersConnector.class)
+void referenceTest(ConsumerReferenceTestCase testCase) throws ReferenceTestException {
+    testCase.run();
+}
+....
+
+[cols="1,1,3", options="header"]
+|===
+|Attribute |Required |Description
+|`path` |yes |Classpath path to the reference data. A *directory* produces one test case per `*.xml` file inside it (all other files, e.g. attachment binaries, are ignored); a *single file* produces exactly one test case.
+|`ignoreNamespaces` |yes (no default) |Ignore namespace URIs when comparing results.
+|`compareAttachments` |no (`false`) |Compare the attachments of the result message byte for byte.
+|`consumer` / `producer` |exactly one |Connector class under test. Setting both or neither raises an `IllegalArgumentException`.
+|===
+
+The method parameter receives the test case. Use `ConsumerReferenceTestCase` or `ProducerReferenceTestCase` matching the reference files, or `AbstractReferenceTestCase` for both.
+
+=== Reference File
+
+A reference file mixes two namespaces: the connector namespace for the payload, and `http://transconnect.io/connector/test` for the test metadata.
+
+[source,xml]
+....
+<?xml version="1.0" encoding="UTF-8"?>
+<message xmlns="http://example.com/connector/count"
+         xmlns:test="http://transconnect.io/connector/test"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://example.com/connector/count
+             classpath:com/example/connector/count.xsd">
+
+    <test:configuration>
+        <test:property id="countWhitespaces">true</test:property>
+    </test:configuration>
+
+    <input test:interaction="countCharacters">
+        <text>Hello World</text>
+    </input>
+
+    <output>
+        <count>11</count>
+    </output>
+</message>
+....
+
+The root element must declare a default namespace (`xmlns=`) and map it to a schema in `xsi:schemaLocation`. Every reference file is validated twice: against the built-in `test.xsd` for the test elements (see below), and against that connector schema for the `<input>` and `<output>` payloads. The schema location is resolved like this:
+
+[cols="1,2", options="header"]
+|===
+|Schema location |Resolution
+|`classpath:<path>` |loaded from the classpath
+|path containing `resources/` |the part after `resources/` is loaded from the classpath
+|any other relative path |resolved as a file path relative to the reference file
+|anything else with a `:` |rejected (`UNSUPPORTED_PROTOCOL`)
+|===
+
+==== Test Namespace Reference
+
+[cols="1,2", options="header"]
+|===
+|Element / attribute |Purpose
+|`<test:configuration>` |Wraps the connector configuration. Optional, but must contain at least one `<test:property>` when present.
+|`<test:property id="…">` |Value of one configuration property. The `id` must match the property ID in the connector descriptor.
+|`test:interaction` |Attribute on `<input>` naming the interaction to execute. Mandatory for consumer tests.
+|`test:ignore="true"` |Excludes an element — including its whole subtree — from the comparison. Use it for timestamps, generated IDs and similar volatile values.
+|`<test:attachment id="…" file="…"/>` |Declares a file as message attachment inside `<input>` or `<output>`. Resolved relative to the reference file.
+|===
+
+Property values are converted according to the property type from the connector descriptor. `BOOLEAN`, `INTEGER`, `FLOAT`/`DOUBLE` and `TEXT` are parsed directly. `PRIVATE_KEY` and `CERTIFICATE` expect Base64 (a PEM header and footer are stripped automatically).
+
+Everything in the test namespace is stripped before the input message reaches the connector — as is `xsi:schemaLocation`. That matters when the connector uses the JAXB extension.
+
+=== Consumer Test Cases
+
+A consumer reference file needs `<input>` *and* `<output>`. The `<input>` element also needs `test:interaction`, naming the interaction to execute. `run()` creates the context and connection, calls `connection.execute(interaction, input, resultMessage)` and compares the result — the same workflow shown in the sequence diagram above, just declared as data instead of Java code.
+
+Layout:
+
+[source]
+....
+src/test/resources/com/example/connector/reference/consumer/
+├── count-with-whitespaces.xml
+└── count-without-whitespaces.xml
+....
+
+=== Producer Test Cases
+
+A producer reference file has *no* `<input>` element — only the configuration and the expected message. `ProducerReferenceTestCase` acts as both `MessageFactory` and `ProducerConnectorListener`. The connection is opened while the test case is being created. The message handed to `onMessage` / `onMessageWithoutResult` is kept, and `run()` compares it against `<output>`. An error reported via `onError` makes `run()` fail.
+
+[source,java]
+....
+@ReferenceTest(
+        path = "com/example/connector/reference/producer/",
+        ignoreNamespaces = true,
+        producer = EventConnector.class)
+void producerReferenceTest(ProducerReferenceTestCase testCase) throws ReferenceTestException {
+    assertNotNull(testCase.run());
+}
+....
+
+Two things to keep in mind:
+
+* The connector must produce its message during connect, because that's when the framework is listening.
+* If no message arrives, `run()` only logs `No message was created` and returns `null` — the test wouldn't fail on its own. Assert on the return value as shown above.
+
+`ProducerReferenceTestCase` is `AutoCloseable`. The connection can therefore be closed explicitly with `try (testCase)` or `testCase.close()`. Producer support is newer than consumer support and less proven in practice — expect rough edges when writing the first producer reference test.
+
+=== Runtime Configuration
+
+Some configuration values can't be written into a reference file because they're only known at test runtime — for example the host and mapped port of a Testcontainer, a temporary directory, or a token issued by a mock server. The test case exposes the `Configuration` it built from `<test:configuration>`. Such values can therefore be injected before running it:
+
+[source,java]
+....
+@Container
+static final GenericContainer<?> SSH_SERVER =
+        new GenericContainer<>("linuxserver/openssh-server").withExposedPorts(2222);
+
+@ReferenceTest(
+        path = "com/example/connector/reference/consumer/",
+        ignoreNamespaces = true,
+        consumer = SecureShellConnector.class)
+void referenceTest(ConsumerReferenceTestCase testCase) throws ReferenceTestException {
+    MockConfig config = assertInstanceOf(MockConfig.class, testCase.getConfiguration());
+    config.setValue("host", SSH_SERVER.getHost());
+    config.setValue("port", Long.valueOf(SSH_SERVER.getMappedPort(2222)));
+
+    testCase.run();
+}
+....
+
+The configuration is a `MockConfig`. `setValue(String, Object)` therefore either overwrites a property that the reference file declared, or adds a new one. `MockConfig` lives in the test fixtures of the `api` module. These aren't pulled in transitively by the test framework and must be added explicitly:
+
+[source,gradle]
+....
+testImplementation(testFixtures("io.transconnect.connector:api:1.1.1"))
+....
+
+`setValue` takes an `Object`, and the getters of `MockConfig` cast it. The value passed in therefore has to have exactly the Java type that matches the property type in the descriptor:
+
+[cols="1,1", options="header"]
+|===
+|Property type |Java type to pass
+|`TEXT`, `SECRET`, `SELECT` |`String`
+|`INTEGER` |`Long`
+|`FLOAT` |`Double`
+|`BOOLEAN` |`Boolean`
+|`CERTIFICATE` |`java.security.cert.Certificate`
+|`PRIVATE_KEY` |`java.security.PrivateKey`
+|===
+
+Passing an `Integer` for an `INTEGER` property, for example, makes the connector fail with a `ClassCastException` when it reads the value. This mirrors how the framework converts the values from the reference file itself.
+
+IMPORTANT: This only works for consumer connectors. A consumer connection is created inside `run()`, so values injected beforehand are picked up. A producer connection is already established while the test case is being created, which means the configuration can no longer be changed in time.
+
+=== Attachments
+
+*Input attachments* are read eagerly and attached to the input message under the given id:
+
+[source,xml]
+....
+<input test:interaction="countCharacters">
+    <test:attachment id="additionalText" file="additional.txt"/>
+    <text>Hello World</text>
+</input>
+....
+
+*Output attachments* are only checked when `compareAttachments = true`:
+
+[source,xml]
+....
+<output>
+    <count>11</count>
+    <test:attachment id="result" file="expected.bin"/>
+</output>
+....
+
+The sets must match exactly: every declared attachment has to be present and byte-identical. An attachment in the result that isn't declared also fails the test. Expected files are read lazily at comparison time to keep memory usage low.
+
+=== Result Comparison
+
+Comparison uses XMLUnit's `isIdenticalTo` with `ignoreComments()` and `ignoreWhitespace()`, plus an evaluator that honors `test:ignore`:
+
+* `test:ignore="true"` ignores the element and its entire subtree, attributes included.
+* Differences in child node list length are treated as equal, so ignored extra nodes don't break the comparison.
+* Schema location differences are always ignored; namespace URIs only when `ignoreNamespaces = true`.
+
+On a mismatch the test fails with a `ReferenceTestException` containing the absolute path of the reference file and the XMLUnit diff.
+
+=== Troubleshooting
+
+[cols="1,2", options="header"]
+|===
+|Message |Cause
+|`Could not load consumer/producer connector` |Missing or wrong `META-INF/services` entry on the test classpath.
+|`No connector is given in ReferenceTest annotation or you specified consumer and producer` |Set exactly one of `consumer` / `producer`.
+|`The given reference file does not exists` |`path` doesn't resolve on the test classpath.
+|`No default namespace is given (xmlns="...")` |Root element lacks `xmlns=`.
+|`No xsi:schemaLocation is given` / `No schemaLocation mapping found for namespace` |Missing schema location for the default namespace.
+|`Connector XSD not found on classpath` |Schema location points to a resource that isn't on the test classpath.
+|`Attribute test:interaction in input element is not found or empty` |Consumer test without an interaction.
+|`Property test namespace is not given` |`<test:configuration>` present but empty.
+|===
 
 == End-to-End Tests
 

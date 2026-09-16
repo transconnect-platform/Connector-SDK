@@ -93,13 +93,253 @@ dependencies {
 
 `MockContext`:: ist eine Mock-Implementierung des `Context`-Interfaces. Sie kann verwendet werden, um einen Kontext zu erstellen, der dann zur Erstellung eines Connectors genutzt wird.
 
-`MockConfiguration`:: ist eine Mock-Implementierung des `Configuration`-Interfaces. Sie kann verwendet werden, um eine Connector-Konfiguration zu erstellen, die dann zur Erstellung eines `Context` verwendet wird.
+`MockConfig`:: ist eine Mock-Implementierung des `Configuration`-Interfaces. Sie kann verwendet werden, um eine Connector-Konfiguration zu erstellen, die dann zur Erstellung eines `Context` verwendet wird.
 
 `MockMessage`:: ist eine Mock-Implementierung des `Message`-Interfaces. Sie kann verwendet werden, um eine Nachricht zu erstellen, die dann als Eingabenachricht für den Connector während der Ausführung einer Interaktion verwendet wird.
 
 `MockWritableMessage`:: ist eine Mock-Implementierung des `WritableMessage`-Interfaces. Sie kann verwendet werden, um eine beschreibbare Nachricht zu erstellen, die dann vom Connector während der Ausführung einer Interaktion gefüllt wird. Nach der Testausführung kann der Inhalt dieser Nachricht gegen eine erwartete Ergebnisnachricht geprüft werden.
 
 `MessageUtils`:: enthält Hilfsmethoden, die die Nachrichtenbehandlung im Testcode vereinfachen sollen.
+
+== Reference Tests
+
+Testfälle als _Reference-Dateien_ zu beschreiben ist eine Alternative zu klassischen Integrationstests in Java. Statt Java-Code enthält eine Reference-Datei die Connector-Konfiguration, die Eingabenachricht und die erwartete Ergebnisnachricht als XML. Das Connector Test Framework (`io.transconnect.connector:connector-test-framework`) lädt den Connector, führt ihn mit dieser Datei aus und vergleicht das Ergebnis. Ein neuer Testfall bedeutet dann nur noch, eine Datei hinzuzufügen, statt Code zu schreiben.
+
+=== Setup
+
+Bevor Reference Tests geschrieben werden können, muss das Projekt vorbereitet werden: die Abhängigkeit einmalig hinzufügen, und für jeden zu testenden Connector den Connector registrieren sowie eine `@ReferenceTest`-Testmethode anlegen, die ihn über `consumer` bzw. `producer` referenziert.
+
+Die Abhängigkeit in der Datei `build.gradle.kts` hinzufügen:
+
+[source,gradle]
+....
+dependencies {
+    testImplementation("io.transconnect.connector:connector-test-framework:1.1.1")
+}
+....
+
+Die aktuelle Version findet sich auf https://central.sonatype.com/artifact/io.transconnect.connector/connector-test-framework[Maven Central].
+
+Der Connector wird über den `ServiceLoader` geladen und muss deshalb auf dem Test-Classpath registriert sein. Dazu eine Datei anlegen, deren Name dem Connector-Interface entspricht. Sie enthält den vollqualifizierten Klassennamen des Connectors:
+
+`src/test/resources/META-INF/services/io.transconnect.connector.api.consumer.ConsumerConnector`
+
+[source]
+....
+com.example.connector.consumer.CountCharactersConnector
+....
+
+Für Producer-Connectoren heißt die Datei `io.transconnect.connector.api.producer.ProducerConnector`. Fehlt dieser Eintrag, schlägt der Test mit `Could not load consumer connector` bzw. `Could not load producer connector` fehl.
+
+Außerdem wird für jeden Connector, der getestet werden soll, eine mit `@ReferenceTest` annotierte Testmethode angelegt, die ihn per `consumer` oder `producer` referenziert. Die Annotation macht daraus einen parametrisierten JUnit-5-Test; der zugehörige `ReferenceTestProvider` sammelt die Reference-Dateien und erzeugt einen Testfall pro Datei.
+
+[source,java]
+....
+@ReferenceTest(
+        path = "com/example/connector/reference/consumer/",
+        ignoreNamespaces = true,
+        compareAttachments = false,
+        consumer = CountCharactersConnector.class)
+void referenceTest(ConsumerReferenceTestCase testCase) throws ReferenceTestException {
+    testCase.run();
+}
+....
+
+[cols="1,1,3", options="header"]
+|===
+|Attribut |Erforderlich |Beschreibung
+|`path` |ja |Classpath-Pfad zu den Referenzdaten. Ein *Verzeichnis* erzeugt einen Testfall pro `*.xml`-Datei darin (alle anderen Dateien, z. B. Attachment-Binärdateien, werden ignoriert); eine *einzelne Datei* erzeugt genau einen Testfall.
+|`ignoreNamespaces` |ja (kein Default) |Namespace-URIs beim Vergleich der Ergebnisse ignorieren.
+|`compareAttachments` |nein (`false`) |Die Attachments der Ergebnisnachricht byte-genau vergleichen.
+|`consumer` / `producer` |genau eines |Zu testende Connector-Klasse. Werden beide oder keines gesetzt, wird eine `IllegalArgumentException` ausgelöst.
+|===
+
+Der Methodenparameter erhält den Testfall. `ConsumerReferenceTestCase` bzw. `ProducerReferenceTestCase` passend zu den Reference-Dateien verwenden, oder `AbstractReferenceTestCase` für beide.
+
+=== Reference-Datei
+
+Eine Reference-Datei mischt zwei Namespaces: den Connector-Namespace für die Nutzdaten und `http://transconnect.io/connector/test` für die Testmetadaten.
+
+[source,xml]
+....
+<?xml version="1.0" encoding="UTF-8"?>
+<message xmlns="http://example.com/connector/count"
+         xmlns:test="http://transconnect.io/connector/test"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://example.com/connector/count
+             classpath:com/example/connector/count.xsd">
+
+    <test:configuration>
+        <test:property id="countWhitespaces">true</test:property>
+    </test:configuration>
+
+    <input test:interaction="countCharacters">
+        <text>Hello World</text>
+    </input>
+
+    <output>
+        <count>11</count>
+    </output>
+</message>
+....
+
+Das Wurzelelement muss einen Standard-Namespace deklarieren (`xmlns=`) und ihn in `xsi:schemaLocation` auf ein Schema abbilden. Jede Reference-Datei wird zweifach validiert: gegen das mitgelieferte `test.xsd` für die Test-Elemente (siehe unten) und gegen dieses Connector-Schema für die Nutzdaten in `<input>` und `<output>`. Die Schema-Location wird so aufgelöst:
+
+[cols="1,2", options="header"]
+|===
+|Schema-Location |Auflösung
+|`classpath:<path>` |wird vom Classpath geladen
+|Pfad enthält `resources/` |der Teil nach `resources/` wird vom Classpath geladen
+|jeder andere relative Pfad |wird als Dateipfad relativ zur Reference-Datei aufgelöst
+|alles andere mit einem `:` |wird abgelehnt (`UNSUPPORTED_PROTOCOL`)
+|===
+
+==== Test-Namespace-Referenz
+
+[cols="1,2", options="header"]
+|===
+|Element / Attribut |Zweck
+|`<test:configuration>` |Umschließt die Connector-Konfiguration. Optional, muss aber, wenn vorhanden, mindestens eine `<test:property>` enthalten.
+|`<test:property id="…">` |Wert einer Konfigurationseigenschaft. Die `id` muss der Property-ID im Connector-Descriptor entsprechen.
+|`test:interaction` |Attribut auf `<input>`, das die auszuführende Interaktion benennt. Für Consumer-Tests verpflichtend.
+|`test:ignore="true"` |Schließt ein Element — inklusive des gesamten Teilbaums — vom Vergleich aus. Wird für Zeitstempel, generierte IDs und ähnliche volatile Werte verwendet.
+|`<test:attachment id="…" file="…"/>` |Deklariert eine Datei als Nachrichten-Attachment innerhalb von `<input>` oder `<output>`. Wird relativ zur Reference-Datei aufgelöst.
+|===
+
+Property-Werte werden passend zum Property-Typ aus dem Connector-Descriptor konvertiert. `BOOLEAN`, `INTEGER`, `FLOAT`/`DOUBLE` und `TEXT` werden direkt geparst. `PRIVATE_KEY` und `CERTIFICATE` erwarten Base64 (ein PEM-Header und -Footer werden automatisch entfernt).
+
+Alles im Test-Namespace wird entfernt, bevor die Eingabenachricht den Connector erreicht — ebenso `xsi:schemaLocation`. Das ist wichtig, wenn der Connector die JAXB-Extension verwendet.
+
+=== Consumer-Testfälle
+
+Eine Consumer-Reference-Datei benötigt `<input>` *und* `<output>`. Das `<input>`-Element braucht zusätzlich `test:interaction` mit dem Namen der auszuführenden Interaktion. `run()` erstellt Kontext und Verbindung, ruft `connection.execute(interaction, input, resultMessage)` auf und vergleicht das Ergebnis — derselbe Ablauf wie im Sequenzdiagramm oben, nur als Daten statt als Java-Code deklariert.
+
+Ablage:
+
+[source]
+....
+src/test/resources/com/example/connector/reference/consumer/
+├── count-with-whitespaces.xml
+└── count-without-whitespaces.xml
+....
+
+=== Producer-Testfälle
+
+Eine Producer-Reference-Datei hat *kein* `<input>`-Element — nur die Konfiguration und die erwartete Nachricht. `ProducerReferenceTestCase` fungiert sowohl als `MessageFactory` als auch als `ProducerConnectorListener`. Die Verbindung wird bereits beim Erstellen des Testfalls geöffnet. Die an `onMessage` / `onMessageWithoutResult` übergebene Nachricht wird gehalten, und `run()` vergleicht sie mit `<output>`. Ein über `onError` gemeldeter Fehler lässt `run()` fehlschlagen.
+
+[source,java]
+....
+@ReferenceTest(
+        path = "com/example/connector/reference/producer/",
+        ignoreNamespaces = true,
+        producer = EventConnector.class)
+void producerReferenceTest(ProducerReferenceTestCase testCase) throws ReferenceTestException {
+    assertNotNull(testCase.run());
+}
+....
+
+Zwei Dinge sind zu beachten:
+
+* Der Connector muss seine Nachricht während `connect` erzeugen, da das Framework nur währenddessen zuhört.
+* Kommt keine Nachricht an, protokolliert `run()` lediglich `No message was created` und gibt `null` zurück — der Test schlägt dadurch allein nicht fehl. Der Rückgabewert muss wie oben gezeigt geprüft werden.
+
+`ProducerReferenceTestCase` implementiert `AutoCloseable`. Die Verbindung lässt sich also explizit mit `try (testCase)` oder `testCase.close()` schließen. Producer-Unterstützung ist neuer als die für Consumer und in der Praxis weniger erprobt — beim ersten Producer-Reference-Test sind daher Kinderkrankheiten zu erwarten.
+
+=== Laufzeitkonfiguration
+
+Manche Konfigurationswerte lassen sich nicht in eine Reference-Datei schreiben, weil sie erst zur Laufzeit bekannt sind — zum Beispiel Host und Port eines Testcontainers, ein temporäres Verzeichnis oder ein Token von einem Mock-Server. Der Testfall stellt dafür die aus `<test:configuration>` aufgebaute `Configuration` zur Verfügung. Solche Werte lassen sich also vor der Ausführung injizieren:
+
+[source,java]
+....
+@Container
+static final GenericContainer<?> SSH_SERVER =
+        new GenericContainer<>("linuxserver/openssh-server").withExposedPorts(2222);
+
+@ReferenceTest(
+        path = "com/example/connector/reference/consumer/",
+        ignoreNamespaces = true,
+        consumer = SecureShellConnector.class)
+void referenceTest(ConsumerReferenceTestCase testCase) throws ReferenceTestException {
+    MockConfig config = assertInstanceOf(MockConfig.class, testCase.getConfiguration());
+    config.setValue("host", SSH_SERVER.getHost());
+    config.setValue("port", Long.valueOf(SSH_SERVER.getMappedPort(2222)));
+
+    testCase.run();
+}
+....
+
+Die Konfiguration ist ein `MockConfig`-Objekt. `setValue(String, Object)` überschreibt damit entweder eine von der Reference-Datei deklarierte Property oder fügt eine neue hinzu. `MockConfig` liegt in den Test Fixtures des Moduls `api`. Diese werden vom Test Framework nicht automatisch mitgezogen und müssen explizit hinzugefügt werden:
+
+[source,gradle]
+....
+testImplementation(testFixtures("io.transconnect.connector:api:1.1.1"))
+....
+
+`setValue` nimmt ein `Object` entgegen, und die Getter von `MockConfig` casten es. Der übergebene Wert muss deshalb genau den Java-Typ haben, der im Descriptor zum jeweiligen Property-Typ gehört:
+
+[cols="1,1", options="header"]
+|===
+|Property-Typ |zu übergebender Java-Typ
+|`TEXT`, `SECRET`, `SELECT` |`String`
+|`INTEGER` |`Long`
+|`FLOAT` |`Double`
+|`BOOLEAN` |`Boolean`
+|`CERTIFICATE` |`java.security.cert.Certificate`
+|`PRIVATE_KEY` |`java.security.PrivateKey`
+|===
+
+Wird beispielsweise ein `Integer` für eine `INTEGER`-Property übergeben, schlägt der Connector beim Lesen des Werts mit einer `ClassCastException` fehl. Das entspricht der Art, wie das Framework die Werte aus der Reference-Datei selbst konvertiert.
+
+IMPORTANT: Dies funktioniert nur bei Consumer-Connectoren. Eine Consumer-Verbindung wird innerhalb von `run()` erstellt, sodass vorher injizierte Werte berücksichtigt werden. Bei einem Producer ist die Verbindung bereits aufgebaut, während der Testfall erstellt wird — die Konfiguration kann dann nicht mehr rechtzeitig geändert werden.
+
+=== Attachments
+
+*Eingabe-Attachments* werden sofort gelesen und der Eingabenachricht unter der angegebenen ID angehängt:
+
+[source,xml]
+....
+<input test:interaction="countCharacters">
+    <test:attachment id="additionalText" file="additional.txt"/>
+    <text>Hello World</text>
+</input>
+....
+
+*Ausgabe-Attachments* werden nur geprüft, wenn `compareAttachments = true` gesetzt ist:
+
+[source,xml]
+....
+<output>
+    <count>11</count>
+    <test:attachment id="result" file="expected.bin"/>
+</output>
+....
+
+Die Mengen müssen exakt übereinstimmen: Jedes deklarierte Attachment muss vorhanden und byte-identisch sein. Ein Attachment im Ergebnis, das nicht deklariert wurde, lässt den Test ebenfalls fehlschlagen. Erwartete Dateien werden erst beim Vergleich gelesen, um den Speicherverbrauch gering zu halten.
+
+=== Ergebnisvergleich
+
+Der Vergleich verwendet XMLUnits `isIdenticalTo` mit `ignoreComments()` und `ignoreWhitespace()`, sowie einen Evaluator, der `test:ignore` berücksichtigt:
+
+* `test:ignore="true"` blendet das Element und seinen gesamten Teilbaum, inklusive Attribute, aus dem Vergleich aus.
+* Unterschiede in der Anzahl der Kindknoten werden als gleich behandelt, sodass ignorierte zusätzliche Knoten den Vergleich nicht stören.
+* Unterschiede in der Schema-Location werden immer ignoriert; Namespace-URIs nur, wenn `ignoreNamespaces = true` gesetzt ist.
+
+Bei einer Abweichung schlägt der Test mit einer `ReferenceTestException` fehl, die den absoluten Pfad der Reference-Datei und das XMLUnit-Diff enthält.
+
+=== Troubleshooting
+
+[cols="1,2", options="header"]
+|===
+|Meldung |Ursache
+|`Could not load consumer/producer connector` |Fehlender oder falscher `META-INF/services`-Eintrag auf dem Test-Classpath.
+|`No connector is given in ReferenceTest annotation or you specified consumer and producer` |Es muss genau eines von `consumer` / `producer` gesetzt sein.
+|`The given reference file does not exists` |`path` lässt sich nicht auf dem Test-Classpath auflösen.
+|`No default namespace is given (xmlns="...")` |Dem Wurzelelement fehlt `xmlns=`.
+|`No xsi:schemaLocation is given` / `No schemaLocation mapping found for namespace` |Fehlende Schema-Location für den Standard-Namespace.
+|`Connector XSD not found on classpath` |Die Schema-Location verweist auf eine Ressource, die nicht auf dem Test-Classpath liegt.
+|`Attribute test:interaction in input element is not found or empty` |Consumer-Test ohne Interaktion.
+|`Property test namespace is not given` |`<test:configuration>` vorhanden, aber leer.
+|===
 
 == End-to-End-Tests
 
