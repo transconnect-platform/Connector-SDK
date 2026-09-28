@@ -144,7 +144,7 @@ Behalten Sie nur die JUnit-Abhängigkeit.
 [source,kotlin]
 ....
 dependencies {
-    providedCompile("io.transconnect.connector:api:${connectorSdkVersion}")
+    providedCompile("io.transconnect.connector:api:<VERSION>")
 
     providedCompile("org.slf4j:slf4j-api:1.7.36")
 }

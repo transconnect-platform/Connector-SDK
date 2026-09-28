@@ -28,4 +28,5 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(testFixtures(project(":api")))
     testImplementation(libs.slf4jApi)
+    testImplementation(libs.mockito)
 }

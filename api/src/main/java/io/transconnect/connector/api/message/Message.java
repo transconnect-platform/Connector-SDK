@@ -35,6 +35,7 @@ public interface Message {
      *
      * @return the body of the Message
      * @throws XMLStreamException if there is a problem to read the body with an XML Reader.
+     * @see CloseableXMLEventReader
      */
     XMLEventReader getXmlBody() throws XMLStreamException;
 

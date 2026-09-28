@@ -5,6 +5,7 @@ package io.transconnect.connector.extension.jaxb;
 
 import io.transconnect.connector.api.TransconnectConnectorException;
 import io.transconnect.connector.api.extension.ConnectorExtension;
+import io.transconnect.connector.api.message.CloseableXMLEventReader;
 import io.transconnect.connector.api.message.Message;
 import io.transconnect.connector.api.message.WritableMessage;
 import jakarta.xml.bind.JAXBContext;
@@ -57,17 +58,16 @@ public class JaxbExtension implements ConnectorExtension {
      * @param schemaResourcePath the resource path for the XML schema used for validation, may be null
      * @param bindingResourcePath the resource path for the MOXy binding file, may be null if not needed
      * @param <T> the type to unmarshal into
-     * @return the unmarshalled object
+     * @return the Java representation of the message's XML content, as an instance of {@code clazz}
      * @throws TransconnectConnectorException if the message could not be unmarshalled
      */
     public <T> T unmarshalMessage(
             Message message, Class<T> clazz, String schemaResourcePath, String bindingResourcePath)
             throws TransconnectConnectorException {
-        try {
+        try (var reader = new CloseableXMLEventReader(message.getXmlBody())) {
             var unmarshaller = getInputUnmarshaller(clazz, schemaResourcePath, bindingResourcePath);
-            T result = (T) unmarshaller.unmarshal(message.getXmlBody());
+            T result = (T) unmarshaller.unmarshal(reader.delegate());
             LOG.debug("Successfully unmarshalled XML to {}", clazz.getSimpleName());
-
             return result;
         } catch (JAXBException | XMLStreamException e) {
             throw new TransconnectConnectorException(
@@ -158,7 +158,6 @@ public class JaxbExtension implements ConnectorExtension {
         if (inputUnmarshaller == null) {
             // create unmarshaller
             inputUnmarshaller = jaxbContexts.get(inputClass).createUnmarshaller();
-            unmarshallers.put(inputClass, inputUnmarshaller);
 
             // Load schema for validation
             if (schemaResourcePath != null) {
@@ -173,6 +172,9 @@ public class JaxbExtension implements ConnectorExtension {
                 LOG.error("Validation error: {}", event.getMessage());
                 return false; // Return false to stop processing on the first error
             });
+
+            // Add unmarshaller to cache
+            unmarshallers.put(inputClass, inputUnmarshaller);
         }
 
         return inputUnmarshaller;

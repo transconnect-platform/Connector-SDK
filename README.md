@@ -200,10 +200,11 @@ public class CountCharactersConnection implements ConsumerConnection {
         if (!"countCharacters".equals(interactionId.toString())) {
             throw new TransconnectConnectorException("Unknown interaction: '%s'".formatted(interactionId));
         }
-        try (var out = output.getBodyOutputStream()) {
-            long count = countCharacters(input.getXmlBody());
+        try (var out = output.getBodyOutputStream();
+                var reader = new CloseableXMLEventReader(input.getXmlBody())) {
+            long count = countCharacters(reader.delegate());
             out.write("<ROOT><COUNT>%d</COUNT></ROOT>".formatted(count).getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
+        } catch (IOException | XMLStreamException e) {
             throw new TransconnectConnectorException("Error processing message", e);
         }
     }
@@ -222,6 +223,8 @@ public class CountCharactersConnection implements ConsumerConnection {
 
 A complete, buildable version of both connectors lives in
 [`documentation/tutorial-example`](documentation/tutorial-example/).
+It resolves the SDK from Maven Central; `connectorSdkVersion` in its `gradle.properties`
+defaults to `1.+`, the latest 1.x release.
 
 ## Documentation
 
