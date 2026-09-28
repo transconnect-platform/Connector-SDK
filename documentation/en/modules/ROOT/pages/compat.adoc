@@ -33,6 +33,9 @@ tasks.war {
 }
 ....
 
+The attribute needs a concrete version.
+If the dependency uses a dynamic version such as `1.+`, stamp the resolved version instead; the xref:introduction.adoc#download-example-project[tutorial example] shows how.
+
 NOTE: If a connector does not declare the attribute, the server registers it with a warning and skips the compatibility check, so existing connectors keep working.
 Declaring it is recommended so that deployment problems are reported with a meaningful message.
 

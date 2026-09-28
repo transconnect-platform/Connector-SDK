@@ -6,9 +6,16 @@ package io.transconnect.connector.extension.jaxb;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import io.transconnect.connector.MessageUtils;
 import io.transconnect.connector.MockMessage;
 import io.transconnect.connector.MockWritableMessage;
+import io.transconnect.connector.api.message.Message;
+import javax.xml.stream.XMLEventReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +54,38 @@ class JaxbExtensionTest {
         assertThrows(
                 RuntimeException.class,
                 () -> extension.unmarshalMessage(message, TestObject.class, "schema/execute_in.xsd", null));
+    }
+
+    @Test
+    void unmarshalMessage_validXml_closesXmlEventReader() throws Exception {
+        // Given
+        String xml = "<?xml version=\"1.0\""
+                + " encoding=\"UTF-8\"?><testObject><name>test</name><value>123</value></testObject>";
+        XMLEventReader reader = spy(MessageUtils.getXmlEventReader(xml));
+        Message message = mock(Message.class);
+        when(message.getXmlBody()).thenReturn(reader);
+
+        // When
+        extension.unmarshalMessage(message, TestObject.class, "schema/execute_in.xsd", null);
+
+        // Then
+        verify(reader).close();
+    }
+
+    @Test
+    void unmarshalMessage_invalidXml_closesXmlEventReaderOnFailure() throws Exception {
+        // Given
+        XMLEventReader reader = spy(MessageUtils.getXmlEventReader("invalid xml content"));
+        Message message = mock(Message.class);
+        when(message.getXmlBody()).thenReturn(reader);
+
+        // When
+        assertThrows(
+                RuntimeException.class,
+                () -> extension.unmarshalMessage(message, TestObject.class, "schema/execute_in.xsd", null));
+
+        // Then
+        verify(reader).close();
     }
 
     @Test

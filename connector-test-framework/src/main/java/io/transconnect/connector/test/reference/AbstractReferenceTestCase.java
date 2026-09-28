@@ -7,6 +7,7 @@ package io.transconnect.connector.test.reference;
 import io.transconnect.connector.MockConfig;
 import io.transconnect.connector.MockMessage;
 import io.transconnect.connector.api.Configuration;
+import io.transconnect.connector.api.message.CloseableXMLEventReader;
 import io.transconnect.connector.api.message.Message;
 import io.transconnect.connector.api.property.ConnectorPropertyType;
 import io.transconnect.connector.api.property.IConnectorProperty;
@@ -146,10 +147,11 @@ public abstract class AbstractReferenceTestCase {
         MockMessage returnMessage;
 
         XMLEventWriter eventWriter = null;
-        try (StringWriter writer = new StringWriter()) {
+        try (StringWriter writer = new StringWriter();
+                CloseableXMLEventReader reader = new CloseableXMLEventReader(output.getXmlBody())) {
             XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
             eventWriter = outputFactory.createXMLEventWriter(writer);
-            eventWriter.add(output.getXmlBody());
+            eventWriter.add(reader.delegate());
             eventWriter.flush();
             result = writer.toString();
 

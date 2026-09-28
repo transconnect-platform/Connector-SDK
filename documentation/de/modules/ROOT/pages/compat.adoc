@@ -33,6 +33,9 @@ tasks.war {
 }
 ....
 
+Das Attribut benötigt eine konkrete Version.
+Verwendet die Abhängigkeit eine dynamische Version wie `1.+`, tragen Sie stattdessen die aufgelöste Version ein; das xref:introduction.adoc#download-example-project[Tutorial-Beispiel] zeigt, wie.
+
 NOTE: Deklariert ein Connector das Attribut nicht, registriert der Server ihn mit einer Warnung und überspringt die Kompatibilitätsprüfung, sodass bestehende Connectoren weiterhin funktionieren.
 Die Deklaration wird empfohlen, damit Deployment-Probleme mit einer verständlichen Meldung gemeldet werden.
 

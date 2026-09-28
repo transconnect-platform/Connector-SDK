@@ -5,8 +5,8 @@ plugins {
 
 version = "1.0.0"
 
-// Connector SDK version to compile against
-val connectorSdkVersion = project.findProperty("connectorSdkVersion") as String? ?: "1.1.1"
+// Connector SDK version to compile against, set in gradle.properties
+val connectorSdkVersion = providers.gradleProperty("connectorSdkVersion").get()
 
 repositories {
     mavenCentral()
@@ -41,10 +41,18 @@ tasks.test {
 }
 
 // Declare the Connector SDK API version so the server can perform the
-// compatibility check when the connector is deployed.
+// compatibility check when the connector is deployed. The resolved version is
+// used, since connectorSdkVersion may be a dynamic selector such as "1.+".
+val connectorApiVersion = configurations.compileClasspath.map { classpath ->
+    classpath.incoming.resolutionResult.allComponents
+        .mapNotNull { it.moduleVersion }
+        .first { it.group == "io.transconnect.connector" && it.name == "api" }
+        .version
+}
+
 tasks.war {
     manifest {
-        attributes("TC-Connector-API" to connectorSdkVersion)
+        attributes("TC-Connector-API" to connectorApiVersion)
     }
 }
 

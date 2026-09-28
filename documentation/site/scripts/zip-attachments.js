@@ -9,6 +9,9 @@ const config = {
   languages: ["de", "en"],
   component: "sdk-doc",
   attachmentFolder: "tutorial-example",
+  // Antora drops files without an extension, so these are added from the source folder
+  sourceFolder: "tutorial-example",
+  executables: ["gradlew"],
 };
 
 function componentDir(language) {
@@ -62,6 +65,12 @@ function createZip(language) {
 
     archive.pipe(output);
     archive.directory(attachmentPath, config.attachmentFolder);
+    for (const file of config.executables) {
+      archive.file(path.join(config.sourceFolder, file), {
+        name: `${config.attachmentFolder}/${file}`,
+        mode: 0o755,
+      });
+    }
     archive.finalize();
   });
 }

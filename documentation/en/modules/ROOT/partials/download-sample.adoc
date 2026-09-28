@@ -2,9 +2,12 @@
 
 The whole example project with the complete source code can be downloaded xref:attachment$tutorial-example.zip[here].
 Download the ZIP file and extract it to a directory of your choice.
+The project resolves the Connector SDK from Maven Central.
+Its version is set by `connectorSdkVersion` in `gradle.properties`; the default `1.+` selects the latest 1.x release.
+Set a fixed version there for reproducible builds.
 Build the project with Gradle by running the following command in the project directory:
 
 [source,console]
 ....
-$ ./gradle clean build
+$ ./gradlew clean build
 ....
